@@ -66,12 +66,14 @@ export default function Login() {
                                 <span>Login</span>
                             </button>
                         </form>
-                        <p>New here?{" "}
-                            <a href="/register" className="text-blue-500 hover:underline">Register</a>
-                        </p>
-                        <p>Forgot your password?{" "}
-                            <a href="/forgot-password" className="text-blue-500 hover:underline">Recover Account</a>
-                        </p>
+                        <div className="text-sm text-gray-600 mt-8">
+                            <p>New here?{" "}
+                                <a href="/register" className="text-blue-500 hover:underline">Register</a>
+                            </p>
+                            <p>Forgot your password?{" "}
+                                <a href="/forgot-password" className="text-blue-500 hover:underline">Recover Account</a>
+                            </p>
+                        </div>
                     </>
                 ) : (
                     <>
