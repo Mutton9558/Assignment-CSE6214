@@ -1,13 +1,8 @@
-import StudentDashboard from "../app/components/StudentDashboard";
-import Login from "../app/login/page";
+import StudentDashboard from "../components/StudentDashboard";
+import Login from "../login/page";
 
 export default function Dashboard() {
   const userRole = "student"; // This would typically come from your authentication logic
-  const isAuthenticated = true; // This would also come from your authentication logic
-  
-  if (!isAuthenticated) {
-    return <Login />;
-  }
   
   if (userRole === "student") {
     return <StudentDashboard />;
