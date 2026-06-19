@@ -6,8 +6,12 @@ import { MdHome, MdPerson } from "react-icons/md";
 import { FaCalendarPlus } from "react-icons/fa";
 import Input from "./input";
 
-export default function StudentDashboard() {
-    const [activeSection, setActiveSection] = useState("home");
+interface StudentDashboardProp{
+    default_sect: string | null
+}
+
+export default function StudentDashboard({default_sect}: StudentDashboardProp) {
+    const [activeSection, setActiveSection] = useState(default_sect === null ? "home" : default_sect);
     
     const studentNav : NavItem[] = [
         { id: "home", label: "Home", icon: MdHome },
