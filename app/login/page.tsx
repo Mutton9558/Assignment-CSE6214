@@ -45,7 +45,7 @@ export default function Login() {
     }
 
     return (
-        <div className="flex h-screen items-center justify-center bg-radial-[at_0%_100%] from-blue-500 to-gray-200 bg-[length:200%_200%] animate-gradient">
+        <div className="flex h-screen items-center justify-center bg-radial-[at_0%_100%] from-black to-gray-200 bg-[length:200%_200%] animate-gradient">
             <div className="flex flex-col justify-center h-100% min-w-[60%] max-w-md p-6 bg-white/45 rounded-lg backdrop-blur-sm">
                 {step === "credentials" ? (
                     <>
@@ -62,14 +62,14 @@ export default function Login() {
                                     </label>
                                 </div>
                             </div>
-                            <Button type="submit" className="!bg-blue-500 !text-white py-3 !rounded-2xl !w-45 justify-between" buttonText="→ Login" />
+                            <Button type="submit" className="!text-white py-3 !rounded-2xl !w-45 justify-between" buttonText="→ Login" />
                         </form>
-                        <div className="text-sm text-gray-600 mt-8">
+                        <div className="text-sm mt-8">
                             <p>New here?{" "}
-                                <a href="/register" className="text-blue-500 hover:underline">Register</a>
+                                <a href="/register" className="font-bold underline">Register</a>
                             </p>
                             <p>Forgot your password?{" "}
-                                <a href="/forgot-password" className="text-blue-500 hover:underline">Recover Account</a>
+                                <a href="/forgot-password" className="font-bold underline">Recover Account</a>
                             </p>
                         </div>
                     </>
@@ -79,7 +79,7 @@ export default function Login() {
                         <p className="text-sm text-gray-600">The code sent to {mockBackendData.userPreferences.email}.</p>
                         <form className="mt-6 flex flex-col gap-8">
                             <Input key="2faCode" label="Authentication Code" type="text" placeholder="Enter 2FA code" required />
-                            <Button type="submit" className="flex items-center justify-center gap-3 bg-blue-500 text-white py-3 rounded-md cursor-pointer hover:bg-blue-600 transition-colors" buttonText="→ Verify" />
+                            <Button type="submit" className="flex items-center justify-center gap-3 text-white py-3 rounded-md cursor-pointer hover:bg-blue-600 transition-colors" buttonText="→ Verify" />
                         </form>
                     </>
                 )}

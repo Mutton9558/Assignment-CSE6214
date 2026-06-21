@@ -1,4 +1,4 @@
-import StudentDashboard from "../components/StudentDashboard";
+import StudentDashboard from "../components/Dashboard/StudentDashboard";
 import Login from "../login/page";
 
 export default function Dashboard() {
