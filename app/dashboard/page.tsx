@@ -1,4 +1,4 @@
-import StudentDashboard from "../components/StudentDashboard";
+import StudentDashboard from "../components/Dashboard/StudentDashboard";
 import Login from "../login/page";
 interface PageProps {
   searchParams: Promise<{ default_sect?: string }>;
