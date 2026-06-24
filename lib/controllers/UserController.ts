@@ -1,5 +1,4 @@
-import { db } from '@/lib/DatabaseInitializer';
-import { doc, getDoc, setDoc, updateDoc, collection, query, where, getDocs } from 'firebase/firestore';
+import { adminDb } from '@/lib/DatabaseInitializer';
 import bcrypt from 'bcrypt';
 import { User } from '@/types';
 
@@ -13,10 +12,10 @@ export class UserController {
         department: string;
     }) {
         try {
-            const userRef = doc(db, 'Users', newUserParams.user_id);
-            const userSnapshot = await getDoc(userRef);
+            const userRef = adminDb.collection('Users').doc(newUserParams.user_id);
+            const userSnapshot = await userRef.get();
 
-            if (userSnapshot.exists()) {
+            if (userSnapshot.exists) {
                 throw new Error('User already exists');
             }
 
@@ -34,7 +33,7 @@ export class UserController {
                 two_factor_enabled: false
             };
 
-            await setDoc(userRef, newUser);
+            await userRef.set(newUser);
             return { success: true, message: 'User registered successfully' };
         } catch (error) {
             console.error('Error registering user:', error);
@@ -44,10 +43,11 @@ export class UserController {
 
     static async loginUser(user_id: string, password: string) {
         try {
-            const userRef = doc(db, 'Users', user_id);
-            const userSnapshot = await getDoc(userRef);
+            console.log('Private Key:', process.env.private_key); // Debugging line
+            const userRef = adminDb.collection('Users').doc(user_id);
+            const userSnapshot = await userRef.get();
 
-            if (!userSnapshot.exists()) {
+            if (!userSnapshot.exists) {
                 throw new Error('Invalid user ID or password');
             }
 
@@ -67,9 +67,9 @@ export class UserController {
 
     static async verifyEmail(email: string) {
         try {
-            const usersRef = collection(db, 'Users');
-            const q = query(usersRef, where('email', '==', email));
-            const userSnapshot = await getDocs(q);
+            const usersRef = adminDb.collection('Users');
+            const q = usersRef.where('email', '==', email);
+            const userSnapshot = await q.get();
 
             if (userSnapshot.empty) {
                 throw new Error('Email not found');
@@ -86,8 +86,8 @@ export class UserController {
     static async resetPassword(user_id: string, newPassword: string) {
         try {
             const hashedPassword = await bcrypt.hash(newPassword, 10);
-            const userRef = doc(db, 'Users', user_id);
-            await updateDoc(userRef, { password: hashedPassword });
+            const userRef = adminDb.collection('Users').doc(user_id);
+            await userRef.update({ password: hashedPassword });
             return { success: true, message: 'Password reset successfully' };
         } catch (error) {
             console.error('Error resetting password:', error);
