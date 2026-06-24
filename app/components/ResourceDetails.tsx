@@ -1,8 +1,6 @@
 "use client"
 
 import BackButton from "@/app/components/BackButton";
-import { db } from "@/lib/DatabaseInitializer";
-import { collection, getDocs } from 'firebase/firestore/lite';
 import { useEffect, useState, useRef } from "react";
 import Image from "next/image";
 import NavBar, {NavItem} from "@/app/components/NavBar";

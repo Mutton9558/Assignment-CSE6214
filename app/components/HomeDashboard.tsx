@@ -1,6 +1,12 @@
 import Button from "./Button";
+import { useRouter } from "next/navigation";
 
-export default function HomeDashboard() {
+interface HomeProps {
+    setActiveSection: (section: string) => void;
+}
+
+export default function HomeDashboard({ setActiveSection }: HomeProps) {
+    const router = useRouter();
     const mockEvents = [
         {
             id: 1,
@@ -47,14 +53,14 @@ export default function HomeDashboard() {
         <div className="p-6 h-full w-full max-w-lg mx-auto">
             <header className="flex justify-between items-center mb-6">
                 <h1 className="text-2xl font-bold mb-4">Hi, John!</h1>
-                <Button className="!w-10 !h-10 !p-2" buttonText="🔔" />
+                <Button className="!w-10 !h-10 !p-2" buttonText="🔔" onClick={() => {router.push('/notification')}} />
             </header>
 
             <div className="flex flex-col gap-4 w-full">
                 <div className="bg-background/20 z-50 backdrop-blur-md p-4 rounded-3xl shadow-md">
                     <div className="flex justify-between items-center mb-4">
                         <h2 className="text-xl font-bold mb-2">Calendar ({ShowMonth()})</h2>
-                        <Button className="!p-1 !w-8 !h-8" buttonText='→' />
+                        <Button className="!p-1 !w-8 !h-8" buttonText='→' onClick={() => {router.push('/calendar')}} />
                     </div>
                     <div className="flex flex-row gap-4 w-full justify-between items-start">
                         <div className="grid w-1/2 grid-cols-7 gap-1">
@@ -102,7 +108,7 @@ export default function HomeDashboard() {
                 <div className="bg-background/20 z-50 backdrop-blur-md p-5 rounded-3xl shadow-md">
                     <div className="flex justify-between items-center mb-6">
                         <h2 className="text-xl font-bold mb-2">Reports</h2>
-                        <Button className="!w-25 !h-10" buttonText='→' />
+                        <Button className="!w-25 !h-10 font-bold" buttonText='→' onClick={() => setActiveSection('profile-reports')} />
                     </div>
                     <div className="flex flex-col gap-6 w-full px-2">
                         <div className="flex flex-row items-end gap-4 w-full">
