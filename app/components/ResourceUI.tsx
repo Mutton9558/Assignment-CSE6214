@@ -1,4 +1,4 @@
-import { ResourceSelectDepartment } from "./ResoourceSelectDepartment";
+import { ResourceSelectDepartment } from "./ResourceSelectDepartment";
 import React from "react";
 import { ResourceDetails } from "./ResourceDetails";
 import { EditResourceDetails } from "./EditResourceDetails";
