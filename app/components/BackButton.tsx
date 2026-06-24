@@ -1,5 +1,5 @@
 import Link from "next/link"
-import { redirect } from 'next/navigation';
+import { useRouter } from "next/navigation"
 
 interface BackButtonProp{
     buttonName: string,
@@ -8,13 +8,10 @@ interface BackButtonProp{
 
 export default function BackButton({buttonName, buttonDesc}: BackButtonProp){
 
-    // const prevPage = history.state.from;
-    // if(prevPage === undefined || prevPage === null){
-    //     redirect('/');
-    // }
-
+    const router = useRouter();
+    
     return(
-        <Link href={'/'} id="back-btn" className="absolute top-0 left-0 flex flex-row w-fit h-20 p-4">
+        <button onClick={() => router.back()} id="back-btn" className="absolute top-0 left-0 flex flex-row w-fit h-20 p-4 cursor-pointer">
             <div id="left side" className="w-8 h-10 items-center">
                 <p>
                     ←
@@ -28,6 +25,6 @@ export default function BackButton({buttonName, buttonDesc}: BackButtonProp){
                     <p>{buttonDesc}</p>
                 </div>
             </div>
-        </Link>
+        </button>
     )
 }
