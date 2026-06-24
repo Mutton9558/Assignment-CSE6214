@@ -4,7 +4,7 @@ import ReportCard from "../ReportCard";
 import Input from "../input";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { MaintenanceRequest } from "@/types";
+import { Booking, MaintenanceRequest } from "@/types";
 
 
 interface ProfileProps {
@@ -15,6 +15,31 @@ interface ProfileProps {
 export default function Profile({ setActiveSection, initialTab = "bookings" }: ProfileProps) {
     const router = useRouter();
     const [currentTab, setCurrentTab] = useState<"bookings" | "reports">(initialTab);
+    const myBooking = [
+    {
+            booking_id: "B001",
+            booking_author: "John Doe",
+            booking_owner: "Admin",
+            booking_start: new Date("2026-07-15T14:00:00"), // Future!
+            booking_end: new Date("2026-07-15T16:00:00"),
+            booking_status: "Approved",
+            booking_reason: "Study Group",
+            resource: "Room 202",
+            request_created_at: new Date()
+        },
+        {
+            booking_id: "B002",
+            booking_author: "John Doe",
+            booking_owner: "Admin",
+            booking_start: new Date("2026-06-01T10:00:00"), // Past!
+            booking_end: new Date("2026-06-01T12:00:00"),
+            booking_status: "Ended",
+            booking_reason: "Project Meeting",
+            resource: "Ideabox 1",
+            request_created_at: new Date()
+        }
+    ] as Booking[];
+
     const mockReports = [
         {
             maintenance_id: "M001",
@@ -51,6 +76,12 @@ export default function Profile({ setActiveSection, initialTab = "bookings" }: P
     useEffect(() => {
         setCurrentTab(initialTab);
     }, [initialTab])
+
+    const now = new Date();
+
+    const upcomingEvents = myBooking.filter((event) => event.booking_start >= now);
+    const pastEvents = myBooking.filter((event) => event.booking_start < now);
+
     return(
         <div className="p-6 h-full w-full max-w-lg mx-auto">
             <header className="flex justify-between items-center mb-6">
@@ -102,25 +133,31 @@ export default function Profile({ setActiveSection, initialTab = "bookings" }: P
                     <div className="bg-background/20 z-50 backdrop-blur-md p-4 rounded-3xl shadow-md">
                         <h2 className="text-xl font-bold mb-4">Upcoming Bookings</h2>
                         <div className="flex flex-col gap-1 w-full">
-                            <BookingCard 
-                                roomImage="/path/to/room-image.jpg"
-                                roomName="Room 202"
-                                date="2024-07-05"
-                                time="2:00 PM - 4:00 PM"
-                                status="Approved"
-                            />
+                            {upcomingEvents.length === 0 ? (
+                                <p className="text-gray-600">You have no upcoming bookings.</p>
+                            ) : (
+                                upcomingEvents.map((booking) => (
+                                    <BookingCard 
+                                        key={booking.booking_id}
+                                        booking={booking}
+                                        roomImage="/path/to/room-image.jpg"
+                                />
+                            )))}
                         </div>
                     </div>
                     <div className="bg-background/20 z-50 backdrop-blur-md p-4 rounded-3xl shadow-md">
                         <h2 className="text-xl font-bold mb-4">Past Bookings</h2>
                         <div className="flex flex-col gap-1 w-full">
-                            <BookingCard 
-                                roomImage="/path/to/room-image.jpg"
-                                roomName="Room 202"
-                                date="2024-07-05"
-                                time="2:00 PM - 4:00 PM"
-                                status="Approved"
-                            />
+                            {pastEvents.length === 0 ? (
+                                <p className="text-gray-600">You have no past bookings.</p>
+                            ) : (
+                                pastEvents.map((booking) => (
+                                    <BookingCard 
+                                        key={booking.booking_id}
+                                        booking={booking}
+                                        roomImage="/path/to/room-image.jpg"
+                                    />
+                            )))}
                         </div>
                     </div>
                 </>

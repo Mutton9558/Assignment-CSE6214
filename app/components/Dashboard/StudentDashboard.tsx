@@ -6,6 +6,7 @@ import { FaCalendarPlus } from "react-icons/fa";
 import { useSearchParams, useRouter } from "next/navigation";
 import HomeDashboard from "../HomeDashboard";
 import PreBooking from "../preBooking";
+import VenueBooking from "../VenueBooking";
 import Profile from "../UserBoundary/Profile";
 import EditProfile from "../UserBoundary/EditProfile";
 
@@ -52,7 +53,9 @@ export default function Student({ default_sect }: StudentDashboardProp) {
             case "home":
                 return <HomeDashboard setActiveSection={setActiveSection} />;
             case "booking":
-                return <PreBooking />;
+                return <PreBooking setActiveSection={setActiveSection} />;
+            case "venue-booking":
+                return <VenueBooking setActiveSection={setActiveSection} />;
             case "profile":
                 return <Profile setActiveSection={setActiveSection} initialTab="bookings" />;
             case "edit-profile":
