@@ -1,5 +1,9 @@
 import Button from "./Button";
 import { useRouter } from "next/navigation";
+import { useState, useEffect } from "react";
+import { getDashboardSummary } from "@/lib/actions/dashboardActions";
+import { useSession } from "next-auth/react";
+import { Booking } from "@/types";
 
 interface HomeProps {
     setActiveSection: (section: string) => void;
@@ -7,6 +11,26 @@ interface HomeProps {
 
 export default function HomeDashboard({ setActiveSection }: HomeProps) {
     const router = useRouter();
+    const { data: session } = useSession();
+    const [summary, setSummary] = useState({
+        openReportsCount: 0,
+        closedReportsCount: 0,
+        upcomingEvents: [] as Booking[],
+    });
+    const [isLoading, setIsLoading] = useState(true);
+
+    useEffect(() => {
+        async function fetchSummary() {
+            if (session?.user?.id) {
+                setIsLoading(true);
+                const data = await getDashboardSummary(session.user.id);
+                setSummary(data);
+                setIsLoading(false);
+            }
+        }
+        fetchSummary();
+    }, [session]);
+
     const mockEvents = [
         {
             id: 1,
@@ -123,11 +147,11 @@ export default function HomeDashboard({ setActiveSection }: HomeProps) {
                     </div>
                     <div className="flex flex-col gap-6 w-full px-2">
                         <div className="flex flex-row items-end gap-4 w-full">
-                            <p className="text-5xl font-bold">{OpenReportNum}</p>
+                            <p className="text-5xl font-bold">{summary.openReportsCount}</p>
                             <p className="text-lg font-semibold">Open Reports</p>
                         </div>
                         <div className="flex flex-row items-end gap-4 w-full">
-                            <p className="text-5xl font-bold">{ClosedReportNum}</p>
+                            <p className="text-5xl font-bold">{summary.closedReportsCount}</p>
                             <p className="text-lg font-semibold">Closed Reports</p>
                         </div>
                     </div>
