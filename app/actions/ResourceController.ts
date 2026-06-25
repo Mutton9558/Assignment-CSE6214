@@ -54,6 +54,40 @@ export async function fetchResource(resourceId: string): Promise<Resource | null
     }
 }
 
+export async function fetchResourceByDept(department: string): Promise<Resource[] | null>{
+    try{
+        const resourceRef = adminDb.collection('Resources');
+        const docRef = resourceRef.where('resource_dept', '==', department);
+        const docSnap = await docRef.get();
+
+        const resources: Resource[] = [];
+        docSnap.forEach(docData => {
+            let equipments: FirestoreEquipmentItem[] = [];
+
+            if (Array.isArray(docData.data().resource_equipments)) {
+                for (const equipment of docData.data().resource_equipments as FirestoreEquipmentItem[]) {
+                    equipments.push({
+                        equipment_name: equipment.equipment_name,
+                        equipment_count: equipment.equipment_count
+                    });
+                }
+            }
+            resources.push({
+                id: docData.id,
+                name: docData.data().resource_name,
+                dept: docData.data().resource_dept,
+                img: docData.data().resource_img_url,
+                status: docData.data().status,
+                equipments
+            })
+        })
+        return resources;
+    } catch (error) {
+        console.error("Failed to fetch resource from Firestore:", error);
+        throw new Error("Internal Server Error");
+    }
+}
+
 export async function addResource(data: Resource){
 
     const existingQuery = await adminDb.collection('Resources').where('resource_name', '==', data.name).get();

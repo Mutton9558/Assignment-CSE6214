@@ -14,7 +14,7 @@ interface ResourceUIProps{
 export class ResourceUI extends React.Component<ResourceUIProps>{
     public static displayList(){
         return(
-            <div className="w-screen flex flex-col p-4">
+            <div className="max-w-screen flex flex-col p-4 overflow-x-hidden">
                 <header className="flex justify-between mb-6">
                     <div>
                         <h1 className="text-2xl font-bold mb-4">Hi, John!</h1>
@@ -25,7 +25,7 @@ export class ResourceUI extends React.Component<ResourceUIProps>{
                 </header>
                 {
                     [...DEPARTMENTS.entries()].map(([key, val]) => (
-                        <ResourceSelectDepartment key={key} department={val} />
+                        <ResourceSelectDepartment key={key} department={key} />
                     ))
                 }
                 <div className="h-32 mt-2"></div>
