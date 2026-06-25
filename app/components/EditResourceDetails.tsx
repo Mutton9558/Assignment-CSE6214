@@ -9,7 +9,7 @@ import { FaCalendarPlus } from "react-icons/fa";
 import { redirect } from "next/navigation";
 import { EquipmentCounter } from "./EquipmentCounter";
 import Input from "./input";
-import { Resource, addResource, modifyResource } from "../actions/ResourceController";
+import { Resource, addResource, modifyResource, fetchResource } from "../actions/ResourceController";
 import { createClient } from "../utils/supabase/client";
 
 interface ResourceDetailsProp{
@@ -19,6 +19,7 @@ interface ResourceDetailsProp{
 
 export function EditResourceDetails({resourceId, department}: ResourceDetailsProp){
     const [activeSection, setActiveSection] = useState("booking");
+    const [loading, setLoading] = useState<boolean>(true);
     const [roomName, setRoomName] = useState("");
     const [imageSource, setImageSource] = useState<string | null>(null)
     type ResourceTuple = [string, number];
@@ -84,10 +85,10 @@ export function EditResourceDetails({resourceId, department}: ResourceDetailsPro
         if(newImageFile){
             const fileExt = newImageFile.name.split('.').pop();
             const timestamp = Date.now();
-            const filePath = `${resourceId}/$${timestamp}.${fileExt}`;
+            const filePath = `${timestamp}.${fileExt}`;
 
             const { error: uploadError } = await supabase.storage
-                .from('media')
+                .from('resource_image')
                 .upload(filePath, newImageFile, {
                 cacheControl: '3600',
                 upsert: false
@@ -95,7 +96,7 @@ export function EditResourceDetails({resourceId, department}: ResourceDetailsPro
 
             if (uploadError) throw uploadError;
 
-            const { data } = supabase.storage.from('media').getPublicUrl(filePath);
+            const { data } = supabase.storage.from('resource_image').getPublicUrl(filePath);
             imageUrl = data.publicUrl;
         }
         if(resourceId === undefined){
@@ -104,28 +105,67 @@ export function EditResourceDetails({resourceId, department}: ResourceDetailsPro
                 name: newName ? newName.toString() : "Unnamed Room",
                 dept: department !== undefined ? department : "Unknown Department",
                 img: imageUrl,
-                status: "Active",
+                status: "Available",
                 equipments: equipmentArr
             }
 
             const res = await addResource(payload);
             if(res?.success){
                 alert('Successfully added resource!');
+                redirect('/manage_resource')
+            } else {
+                if(res.duplicateError){
+                    alert('Resource with such name exists!');
+                } else {
+                    alert('Fail to add resource');
+                }
             }
         } else {
             if(newName){
                 const res = await modifyResource(resourceId, newName.toString(), imageUrl, equipmentArr);
                 if(res.success){
                     alert('Successfully editted resource!');
+                    redirect('/manage_resource')
+                } else {
+                    if(res.duplicateError){
+                        alert('Resource with such name exists!');
+                    } else {
+                        alert('Fail to edit resource');
+                    }
                 }
             }
                 
         }  
     }
 
+    useEffect(() => {
+        if(resourceId !== undefined){
+            async function fetchOldInfo(resource_id: string){
+                const res = await fetchResource(resource_id);
+                if(res){
+                    setRoomName(res.name);
+                    setImageSource(res.img);
+                    let temp: ResourceTuple[] = [];
+                    res.equipments.map((equipment, index) => {
+                        temp.push([equipment.equipment_name, equipment.equipment_count]);
+                    })
+                    setCounts(temp);
+                }
+            }
+
+            fetchOldInfo(resourceId);
+        }
+        setLoading(false);
+    }, [])
+
     return(
+        loading ?
+        <div className="bg-background max-w-screen min-h-screen m-0 p-0 box-border flex flex-col justify-center items-center overflow-x-hidden">
+            <p>Loading...</p>
+        </div>
+        :
         <div className="bg-background max-w-screen min-h-screen m-0 p-0 box-border flex flex-col overflow-x-hidden">
-            <BackButton buttonName="Back" buttonDesc={resourceId === undefined ? "Adding Resource" : `Editing ${resourceId}`}></BackButton>
+            <BackButton buttonName="Back" buttonDesc={roomName === "" ? "Adding Resource" : `Editing ${roomName}`}></BackButton>
             
             <div className="flex flex-col justify-center items-center">
                 <input
@@ -150,7 +190,7 @@ export function EditResourceDetails({resourceId, department}: ResourceDetailsPro
                     <p>Click the image to change it.</p>
                 </div>
             </div>
-            <form className="w-full">
+            <form className="w-full" onSubmit={handleSubmit}>
                 <div className="w-full flex flex-col relative p-8 justify-start">
                     <h1>Room Name:</h1>
                     <input name="room-name" defaultValue={roomName} placeholder="Add resource name" className="w-11/12 h-8 bg-accent rounded-full p-2" required></input>
@@ -160,7 +200,7 @@ export function EditResourceDetails({resourceId, department}: ResourceDetailsPro
                         <h1>Equipment Included:</h1>
                         <button type="button" onClick={
                             () => setCounts((prev) => {
-                                return [...prev, ["New Equipment", 1]];
+                                return [...prev, ["", 1]];
                             })
                         } className="absolute right-0 text-sm mr-[6.25%] bg-accent p-1.5 rounded-full w-32 cursor-pointer">+ Add Equipment</button>
                     </div>
@@ -173,7 +213,7 @@ export function EditResourceDetails({resourceId, department}: ResourceDetailsPro
                         :
                         counts.map(([name, count], index) => {
                             return (
-                                <div key={name} className="relative flex flex-row items-center mb-8">
+                                <div key={index} className="relative flex flex-row items-center mb-8">
                                     <Input 
                                     label="" 
                                     type="text" 

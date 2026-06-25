@@ -55,11 +55,28 @@ export async function fetchResource(resourceId: string): Promise<Resource | null
 }
 
 export async function addResource(data: Resource){
-    const docRef = await adminDb.collection('Resources').add(data);
+
+    const existingQuery = await adminDb.collection('Resources').where('resource_name', '==', data.name).get();
+
+    if (!existingQuery.empty) {
+        return { duplicateError: "A resource with this name already exists." };
+    }
+
+    const docRef = await adminDb.collection('Resources').add({
+        resource_name: data.name,
+        resource_dept: data.dept,
+        resource_img_url: data.img,
+        status: data.status,
+        resource_equipments: data.equipments
+    });
 
     if(docRef.id){
         return (
             {success: true}
+        )
+    } else {
+        return(
+            {error: "fail"}
         )
     }
 }
@@ -67,6 +84,16 @@ export async function addResource(data: Resource){
 export async function modifyResource(id: string, name: string, img: string | null, equipments: FirestoreEquipmentItem[]){
     const docRef = adminDb.collection('Resources').doc(id);
     try{
+
+        const existingQuery = await adminDb.collection('Resources').where('resource_name', '==', name).get();
+
+        // If a document matches, check if its ID is different from the current one
+        const nameTakenByAnotherDoc = existingQuery.docs.some(doc => doc.id !== id);
+
+        if (nameTakenByAnotherDoc) {
+            return { duplicateError: "Another resource is already using this name." };
+        }
+
         await docRef.update({
             resource_name: name,
             resource_img_url: img,

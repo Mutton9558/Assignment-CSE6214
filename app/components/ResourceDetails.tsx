@@ -63,7 +63,11 @@ export function ResourceDetails({resourceId}: ResourceDetailsProp){
                             null
                         }
                     </div>
-                    <h1>Status: <span className={currentResource ? (currentResource.status === "Available" ? "bg-green-400 text-black" : "bg-gray-400 text-gray-600") : "bg-gray-400 text-gray-600"}>{currentResource ? currentResource.status : "Unavailable"}</span></h1>
+                    <div className="w-full flex flex-row justify-center items-center mt-4">
+                        <h1>Status:</h1>
+                        <div className={`ml-4 rounded-2xl p-2 ${currentResource ? (currentResource.status === "Available" ? "bg-green-400 text-black" : "bg-gray-400 text-gray-600") : "bg-gray-400 text-gray-600"}`}>{currentResource ? currentResource.status : "Unavailable"}</div>
+                    </div>
+                    
                     <div id="equipment-details-section" className="mt-8 mb-16 w-full max-h-screen pl-[6.25%] font-bold">
                         <h1>Equipment Included:</h1>
                         <div className="pl-4">
