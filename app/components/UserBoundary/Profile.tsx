@@ -4,7 +4,10 @@ import ReportCard from "../ReportCard";
 import Input from "../input";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { Booking, MaintenanceRequest } from "@/types";
+import { Booking, MaintenanceRequest, User } from "@/types";
+import { getUserProfile } from "@/lib/actions/userActions";
+import { getStudentBookings } from "@/lib/actions/bookingActions";
+import { getStudentReports } from "@/lib/actions/reportActions";
 
 
 interface ProfileProps {

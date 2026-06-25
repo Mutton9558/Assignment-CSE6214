@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Button from "@/app/components/Button";
 import Input from "../components/input";
-import { handleVerifyEmail, handleResetPassword } from "./actions";
+import { handleVerifyEmail, handleResetPassword } from "@/lib/actions/authActions";
 
 export default function forgotPassword() {
     const [step, setStep] = useState<"verify" | "reset">("verify");

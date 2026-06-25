@@ -1,7 +1,7 @@
 "use client";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { handleRegistration } from "./actions";
+import { handleRegistration } from "@/lib/actions/authActions";
 import Input from "../components/input";
 import Button from "../components/Button";
 
