@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Input from "../components/input";
 import Button from "../components/Button";
-import { handleLogin } from "./actions";
+import { handleLogin } from "@/lib/actions/authActions";
 
 export default function Login() {
     const router = useRouter();

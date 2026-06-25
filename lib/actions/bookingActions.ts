@@ -1,6 +1,5 @@
 "use server";
 
-import { auth } from "@/auth";
 import { adminDb } from "@/lib/DatabaseInitializer";
 import { Booking } from "@/types";
 
@@ -23,19 +22,13 @@ export async function getStudentBookings(userId: string): Promise<Booking[]> {
 
 export async function createBooking(bookingData: Booking) {
     try {
-        const session = await auth();
-        
-        if (!session || !session.user) {
-            throw new Error("User not authenticated");
-        }
-
         if (bookingData.booking_end <= bookingData.booking_start) {
             throw new Error("Booking end time must be after start time");
         }
 
         await adminDb.collection("bookings").add({
             ...bookingData,
-            booking_author: session.user.id,
+            booking_author: bookingData.booking_author,
         });
         return { success: true, message: "Booking created successfully" };
     } catch (error) {
