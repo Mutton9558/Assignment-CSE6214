@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import Button from "./Button";
 import Input from "./input";
-import { fetchUserForAutofill } from "@/lib/actions/userActions";
+import { fetchUserForAutofill } from "@/app/actions/userActions";
 
 interface PreBookingProps{
     setActiveSection: (section: string) => void;

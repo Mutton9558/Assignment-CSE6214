@@ -1,5 +1,5 @@
 "use server";
-import { UserController } from "@/lib/controllers/UserController";
+import { UserController } from "@/app/actions/UserController";
 
 export async function handleRegistration(formData: FormData) {
     const user_id = formData.get("student-id") as string;

@@ -1,9 +1,9 @@
 import Button from "./Button";
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
-import { getDashboardSummary } from "@/lib/actions/dashboardActions";
-import { useSession } from "next-auth/react";
+import { getDashboardSummary } from "@/app/actions/dashboardActions";
 import { Booking } from "@/types";
+import { useUser } from "@/app/components/UserBoundary/UserContext";
 
 interface HomeProps {
     setActiveSection: (section: string) => void;
@@ -11,7 +11,7 @@ interface HomeProps {
 
 export default function HomeDashboard({ setActiveSection }: HomeProps) {
     const router = useRouter();
-    const { data: session } = useSession();
+    const { user, isLoading: isUserLoading } = useUser();
     const [summary, setSummary] = useState({
         openReportsCount: 0,
         closedReportsCount: 0,
@@ -21,15 +21,18 @@ export default function HomeDashboard({ setActiveSection }: HomeProps) {
 
     useEffect(() => {
         async function fetchSummary() {
-            if (session?.user?.id) {
-                setIsLoading(true);
-                const data = await getDashboardSummary(session.user.id);
+            try {
+                if (!user?.user_id) return;
+                const data = await getDashboardSummary(user.user_id);
                 setSummary(data);
+            } catch (error) {
+                console.error("Error fetching dashboard summary:", error);
+            } finally {
                 setIsLoading(false);
             }
         }
         fetchSummary();
-    }, [session]);
+    }, [user]);
 
     const mockEvents = [
         {
@@ -80,7 +83,9 @@ export default function HomeDashboard({ setActiveSection }: HomeProps) {
     return (
         <div className="p-6 h-full w-full max-w-lg mx-auto">
             <header className="flex justify-between items-center mb-6">
-                <h1 className="text-2xl font-bold mb-4">Hi, John!</h1>
+                <h1 className="text-2xl font-bold mb-4">
+                    {isUserLoading ? 'Loading...' : `Hi, ${user?.name?.split(' ')[0] || 'User'}!`}
+                </h1>
                 <Button className="!w-10 !h-10 !p-2" buttonText="🔔" onClick={() => {router.push('/notification')}} />
             </header>
 
@@ -132,11 +137,11 @@ export default function HomeDashboard({ setActiveSection }: HomeProps) {
                                     <p className="text-sm font-bold text-gray-600">Your schedule is clear!</p>
                                 </div>
                             )}
-                        
-                            <div className="text-center mt-1 cursor-pointer hover:opacity-80">
-                                <span className="text-sm font-bold">+ 7 events</span>
-                            </div>
                         </div>
+                        {upcomingEvents.length > 3 ? (
+                            <div className="text-sm text-gray-500 mt-2">+{upcomingEvents.length - 3} more</div>
+                        ) : null
+                        }
                     </div>
                 </div>
 

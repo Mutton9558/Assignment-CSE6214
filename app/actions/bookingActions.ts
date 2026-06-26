@@ -2,6 +2,8 @@
 
 import { adminDb } from "@/lib/DatabaseInitializer";
 import { Booking } from "@/types";
+import { Timestamp } from "firebase-admin/firestore";
+import { cleanFirestoreData } from "@/lib/utils";
 
 export async function getStudentBookings(userId: string): Promise<Booking[]> {
     try {
@@ -10,9 +12,8 @@ export async function getStudentBookings(userId: string): Promise<Booking[]> {
             .get();
 
         return snapshot.docs.map(doc => ({
-            ...doc.data(),
-            booking_start: doc.data().booking_start.toDate(),
-            booking_end: doc.data().booking_end.toDate()
+            booking_id: doc.id,
+            ...cleanFirestoreData(doc.data()),
         })) as Booking[];
     } catch (error) {
         console.error("Error fetching student bookings:", error);

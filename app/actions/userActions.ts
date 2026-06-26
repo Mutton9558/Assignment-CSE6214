@@ -2,7 +2,7 @@
 
 import { adminDb } from "@/lib/DatabaseInitializer";
 import { User } from "@/types";
-
+import { cleanFirestoreData } from "@/lib/utils";
 
 export async function fetchUserForAutofill(user_id: string) {
     try {
@@ -29,7 +29,10 @@ export async function getUserProfile(user_id: string): Promise<User | null> {
         const doc = await adminDb.collection('Users').doc(user_id).get();
         if (!doc.exists)
             return null;
-        return doc.data() as User;
+        return {
+            user_id: doc.id,
+            ...cleanFirestoreData(doc.data())
+        } as User;
     } catch (error) {
         console.error("Error fetching user profile:", error);
         throw new Error("Failed to fetch user profile");
