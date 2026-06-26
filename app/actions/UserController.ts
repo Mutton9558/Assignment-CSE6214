@@ -1,6 +1,8 @@
+"use server";
 import { adminDb } from '@/lib/DatabaseInitializer';
 import bcrypt from 'bcrypt';
 import { User } from '@/types';
+import { cleanFirestoreData } from '@/lib/utils';
 
 export class UserController {
     static async registerUser(newUserParams: {

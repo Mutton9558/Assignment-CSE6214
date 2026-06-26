@@ -1,5 +1,8 @@
 import BackButton from "./BackButton";
+import { ResourceUI } from "@/app/components/ResourceUI";
 import { Booking } from "@/types";
+import { ResourceSelectDepartment } from "./ResourceSelectDepartment";
+import { DEPARTMENTS } from "../constants";
 
 interface VenueBookingProps {
     setActiveSection: (section: string) => void;
@@ -27,6 +30,11 @@ export default function VenueBooking({ setActiveSection }: VenueBookingProps) {
                 <BackButton buttonName={`Booking for ${mockBooking.booking_author}`} buttonDesc={`${formatDateTime(mockBooking.booking_start)} to ${formatDateTime(mockBooking.booking_end)}`} />
             </header>
             <div className="w-full h- flex flex-col gap-4 mt-6">
+                {
+                    [...DEPARTMENTS.entries()].map(([key, val]) => (
+                        <ResourceSelectDepartment department={val} />
+                    ))
+                }
             </div>
         </div>
     );

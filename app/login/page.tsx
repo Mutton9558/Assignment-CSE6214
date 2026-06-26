@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Input from "../components/input";
 import Button from "../components/Button";
-import { handleLogin } from "./actions";
+import { handleLogin } from "@/app/actions/authActions";
 
 export default function Login() {
     const router = useRouter();
@@ -25,6 +25,7 @@ export default function Login() {
                 setStep("twoFactor");
             } else {
                 alert("Login successful! Redirecting to dashboard...");
+                localStorage.setItem("user_id", response.user?.user_id || "");
                 router.push("/dashboard");
             }
         } else {

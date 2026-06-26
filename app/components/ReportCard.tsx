@@ -7,7 +7,7 @@ export default function ReportCard({ request, hidden }: { request: MaintenanceRe
 
     const statusColor = 
         request.status === "Pending" ? "bg-yellow-100 text-yellow-800" :
-        request.status === "In Progress" ? "bg-green-100 text-green-800" :
+        request.status === "Resolved" ? "bg-green-100 text-green-800" :
         "bg-gray-100 text-gray-800";
 
     const [formattedDate, setFormattedDate] = useState<string>('');
