@@ -1,9 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import { MdArrowBack } from "react-icons/md";
-import { FaCalendarAlt, FaBook, FaChartLine, FaExclamationCircle } from "react-icons/fa";
+import { MdArrowBack, MdAnalytics } from "react-icons/md";
+import { FaCalendarPlus, FaBookOpen } from "react-icons/fa";
+import { FiAlertOctagon } from "react-icons/fi";
 import { use } from "react";
+import NavBar, { NavItem } from "@/app/components/NavBar";
 
 interface ResourceDetailsPageProps {
   params: Promise<{ id: string }>;
@@ -12,6 +14,18 @@ interface ResourceDetailsPageProps {
 export default function ResourceDetailsPage({ params }: ResourceDetailsPageProps) {
   const { id } = use(params);
   const [actionTaken, setActionTaken] = useState<string | null>(null);
+  const [activeSection, setActiveSection] = useState("booking");
+
+  const managerNavItems: NavItem[] = [
+    { id: "booking", label: "Booking", icon: FaCalendarPlus },
+    { id: "resources", label: "Resources", icon: FaBookOpen },
+    { id: "analytics", label: "Analytics", icon: MdAnalytics },
+    { id: "reports", label: "Reports", icon: FiAlertOctagon },
+  ];
+
+  const handleSectionChange = (id: string) => {
+    setActiveSection(id);
+  };
 
   const bookingData = {
     userName: "MUHAMMAD YUSUF",
@@ -66,24 +80,11 @@ export default function ResourceDetailsPage({ params }: ResourceDetailsPageProps
         </div>
 
         <div className="fixed bottom-8 left-1/2 -translate-x-1/2 z-50 drop-shadow-2xl">
-          <div className="w-fit bg-gray-300 rounded-full px-6 py-3 flex justify-center gap-8">
-            <button className="flex flex-col items-center gap-1 text-gray-700 hover:text-black">
-              <FaCalendarAlt size={24} />
-              <span className="text-sm font-medium">Booking</span>
-            </button>
-            <button className="flex flex-col items-center gap-1 text-gray-700 hover:text-black">
-              <FaBook size={24} />
-              <span className="text-sm font-medium">Resources</span>
-            </button>
-            <button className="flex flex-col items-center gap-1 text-gray-700 hover:text-black">
-              <FaChartLine size={24} />
-              <span className="text-sm font-medium">Analytics</span>
-            </button>
-            <button className="flex flex-col items-center gap-1 text-gray-700 hover:text-black">
-              <FaExclamationCircle size={24} />
-              <span className="text-sm font-medium">Reports</span>
-            </button>
-          </div>
+          <NavBar
+            items={managerNavItems}
+            activeSection={activeSection}
+            onSectionChange={handleSectionChange}
+          />
         </div>
       </div>
     );
@@ -184,24 +185,11 @@ export default function ResourceDetailsPage({ params }: ResourceDetailsPageProps
 
       {/* Bottom Navigation - Resource Manager View */}
       <div className="fixed bottom-8 left-1/2 -translate-x-1/2 z-50 drop-shadow-2xl">
-        <div className="w-fit bg-gray-300 rounded-full px-6 py-3 flex justify-center gap-8">
-          <button className="flex flex-col items-center gap-1 text-gray-700 hover:text-black">
-            <FaCalendarAlt size={24} />
-            <span className="text-sm font-medium">Booking</span>
-          </button>
-          <button className="flex flex-col items-center gap-1 text-gray-700 hover:text-black">
-            <FaBook size={24} />
-            <span className="text-sm font-medium">Resources</span>
-          </button>
-          <button className="flex flex-col items-center gap-1 text-gray-700 hover:text-black">
-            <FaChartLine size={24} />
-            <span className="text-sm font-medium">Analytics</span>
-          </button>
-          <button className="flex flex-col items-center gap-1 text-gray-700 hover:text-black">
-            <FaExclamationCircle size={24} />
-            <span className="text-sm font-medium">Reports</span>
-          </button>
-        </div>
+        <NavBar
+          items={managerNavItems}
+          activeSection={activeSection}
+          onSectionChange={handleSectionChange}
+        />
       </div>
     </div>
   );
