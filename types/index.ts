@@ -34,15 +34,16 @@ export interface Booking {
     prev_booking_id?: string | null;
 }
 
-export interface MaintenanceRequest {
-    maintenance_id: string;
+export interface MaintenanceRequest{
+    fault_id: string;
     request_author: string;
-    faulty_resource: string;
+    faulty_resource_name: string;
+    faulty_resource_dept: string;
     fault_detail: string;
     proof_url: string;
-    request_status: "Awaiting Approval" | "Scheduled" | "Resolved";
-    request_date: Date | Timestamp | string;
-    schedule_service_date: Date | Timestamp | string;
+    status: string;
+    request_date: Date;
+    scheduledServiceDate: Date;
 }
 
 export interface Notification {

@@ -1,50 +1,50 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { FilterButtons } from "./FilterButtons";
 import { MaintenanceRequest } from "@/types";
 import ReportCard from "./ReportCard";
+import { fetchAllRequests } from "../actions/MaintenanceController";
 
 export function MaintenanceRequestList(){
     const [selectedDept, setSelectedDept] = useState("All");
+    const [scheduledReports, setScheduledReports] = useState<MaintenanceRequest[]>([]);
+    const [pendingReports, setPendingReports] = useState<MaintenanceRequest[]>([]);
 
-    const mockReports = [
-            {
-                maintenance_id: "M001",
-                faulty_resource: "Room 101",
-                fault_detail: "Leaking faucet",
-                request_status: "Pending",
-                request_date: new Date("2024-07-01"),
-                request_author: "John Doe",
-                proof_url:"",
-                schedule_service_date: new Date("2024-07-03")
-            },
-            {
-                maintenance_id: "M002",
-                faulty_resource: "Room 202",
-                fault_detail: "Broken window",
-                request_status: "In Progress",
-                request_date: new Date("2024-07-02"),
-                request_author: "John Doe",
-                proof_url: "",
-                schedule_service_date: new Date("2024-07-04")
-            },
-            {
-                maintenance_id: "M003",
-                faulty_resource: "Room 303",
-                fault_detail: "Air conditioning not working",
-                request_status: "Resolved",
-                request_date: new Date("2024-07-03"),
-                request_author: "John Doe",
-                proof_url: "",
-                schedule_service_date: new Date("2024-07-05")
-            },
-        ] as MaintenanceRequest[];
+    useEffect(() => {
+        setScheduledReports([]);
+        setPendingReports([]);
+        async function getRequests(){
+            const reportList = await fetchAllRequests();
+
+            if(reportList){
+                const pending = reportList.filter(report => report.status === "Pending");
+                const scheduled = reportList.filter(report => report.status !== "Pending");
+
+                setPendingReports(pending);
+                setScheduledReports(scheduled);
+            } else {
+                alert('error in fetching reports');
+            }
+                
+            return reportList;
+        }
+
+        getRequests();
+    }, [])
 
     return(
         <div>
             <FilterButtons onClickHandler={setSelectedDept}/>
             <div className="flex flex-col gap-3 w-full mt-4">
-                {mockReports.map((report) => (
-                    <ReportCard key={report.maintenance_id} request={report} />
+                <h1>Pending Reports</h1>
+                {pendingReports.map((report) => (
+                    <ReportCard key={report.fault_id} request={report} hidden={selectedDept !== "All" && selectedDept !== report.faulty_resource_dept} />
+                ))}
+            </div>
+            <div className="w-full h-0.5 bg-black mt-4 mb-4"></div>
+            <h1>Scheduled Reports</h1>
+            <div className="flex flex-col gap-3 w-full mt-4">
+                {scheduledReports.map((report) => (
+                    <ReportCard key={report.fault_id} request={report} hidden={selectedDept !== "All" && selectedDept !== report.faulty_resource_dept} />
                 ))}
             </div>
         </div>
