@@ -117,7 +117,7 @@ export default function HomeDashboard({ setActiveSection }: HomeProps) {
                                         <div
                                             key={booking.booking_id}
                                             className={`${statusColor} rounded-2xl px-5 py-4 shadow-sm transition-transform hover:-translate-y-1 cursor-pointer`}
-                                            onClick={() => setActiveSection('profile')}
+                                            onClick={() => router.push(`/booking_details/${booking.booking_id}`)}
                                         >
                                             <h3 className="text-sm font-bold text-black leading-tight">{booking.resource.resource_name}</h3>
                                             <p className="text-xs text-black/70 mt-1 font-medium leading-tight">{timeframe}</p>
