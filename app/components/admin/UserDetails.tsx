@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
 import { User } from "@/types";
 import { getUserById, deleteUser } from "@/app/actions/adminActions";
 import { MdOutlinePerson, MdOutlineMail, MdOutlinePhone, MdPassword } from "react-icons/md";
@@ -14,7 +13,6 @@ interface Props {
 }
 
 export default function UserDetails({ userId, setActiveSection }: Props) {
-    const router = useRouter();
     const [user, setUser] = useState<User | null>(null);
     const [showPassword, setShowPassword] = useState(false);
     const [loading, setLoading] = useState(true);
@@ -47,7 +45,6 @@ export default function UserDetails({ userId, setActiveSection }: Props) {
                         <p className="text-xs text-gray-500">User List</p>
                     </div>
                 </button>
-                <Button buttonText="🚪" className="!w-10 !h-10" onClick={() => router.push("/login")} />
             </header>
 
             <div className="bg-background/20 z-50 backdrop-blur-md rounded-2xl px-4 py-4 flex items-center gap-3 shadow-md">
