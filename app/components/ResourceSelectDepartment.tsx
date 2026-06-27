@@ -56,6 +56,7 @@ export function ResourceSelectDepartment({department}: ResourceSelectDepartmentP
                 }
             </div>
             <div id="separator-line" className="absolute left-0 bottom-0 h-0.5 w-full bg-black"></div>
+            
         </div>
     )
 }
