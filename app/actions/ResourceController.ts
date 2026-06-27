@@ -140,3 +140,13 @@ export async function modifyResource(id: string, name: string, img: string | nul
         throw error;
     }
 }
+
+export async function deleteResource(id: string){
+    const docRef = adminDb.collection('Resources').doc(id);
+    try{
+        await docRef.delete();
+        return {success: true}
+    } catch (error) {
+        return {error: error}
+    }
+}
