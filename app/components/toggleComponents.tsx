@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 type ToggleProps = {
   label?: string;
@@ -11,6 +11,10 @@ type ToggleProps = {
 export default function Toggle({ label, initial = false, onToggle, activeText = "Enabled", inactiveText = "Disabled" }: ToggleProps) {
   const [enabled, setEnabled] = useState(initial);
 
+  useEffect(() => {
+    setEnabled(initial);
+  }, [initial]);
+
   const handleToggle = () => {
     const newState = !enabled;
     setEnabled(newState);
@@ -22,9 +26,10 @@ export default function Toggle({ label, initial = false, onToggle, activeText = 
       {label && <span className="text-sm font-medium">{label}</span>}
       <button
         onClick={handleToggle}
-        className={`relative inline-flex h-8 w-full items-center rounded-full transition-colors ${
+        className={`relative inline-flex h-8 w-full items-center rounded-full transition-colors cursor-pointer ${
           enabled ? "bg-green-500" : "bg-gray-300"
         }`}
+        type="button"
       >
         <span
           className={`absolute text-1 font-medium select-none transition-all duration-300 ${

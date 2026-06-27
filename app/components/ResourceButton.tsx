@@ -1,6 +1,5 @@
 "use client";
 
-import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { FaRegEdit, FaTrash } from "react-icons/fa";
 
@@ -21,17 +20,18 @@ export function ResourceButton({ResourceID, ResourceName, isResourceManager}: Re
     }
 
     return(
-        <div onClick={handleClick} id="button-cont" className="relative w-4/5 h-16 bg-secondary rounded-xl p-4 cursor-pointer mt-1 mb-1">
+        <div onClick={handleClick} id="button-cont" className="relative w-72 h-16 bg-secondary rounded-xl p-4 cursor-pointer mt-1 mb-1">
             <h1 className="font-mono font-semibold text-xl">{ResourceName}</h1>
             { isResourceManager
             ? 
             <div className="absolute right-0 top-0 flex flex-col items-center justify-center w-1/5 h-full">
-                <button className="cursor-pointer m-1"><FaRegEdit /></button>
-                <button className="cursor-pointer m-1 mr-1.5"><FaTrash /></button>
+                <button onClick={(e) => {e.stopPropagation(); router.push(`/edit_resource/${ResourceID}`);}} className="cursor-pointer m-1"><FaRegEdit /></button>
+                <button onClick={(e) => {e.stopPropagation(); router.push(`/delete_resource?id=${ResourceID}&name=${ResourceName}`);}} className="cursor-pointer m-1 mr-1.5"><FaTrash /></button>
             </div>
             : 
             null
             }
+            
         </div>
     )
 }

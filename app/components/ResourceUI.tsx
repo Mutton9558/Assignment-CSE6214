@@ -6,14 +6,15 @@ import Button from "./Button";
 import { DEPARTMENTS } from "../constants";
 
 interface ResourceUIProps{
-    pageType: "list" | "detail" | "edit";
+    pageType: "list" | "detail" | "edit" | "add";
     resourceId?: string;
+    department?: string;
 }
 
 export class ResourceUI extends React.Component<ResourceUIProps>{
     public static displayList(){
         return(
-            <div className="w-screen flex flex-col p-4">
+            <div className="max-w-screen flex flex-col p-4 overflow-x-hidden">
                 <header className="flex justify-between mb-6">
                     <div>
                         <h1 className="text-2xl font-bold mb-4">Hi, John!</h1>
@@ -24,7 +25,7 @@ export class ResourceUI extends React.Component<ResourceUIProps>{
                 </header>
                 {
                     [...DEPARTMENTS.entries()].map(([key, val]) => (
-                        <ResourceSelectDepartment department={val} />
+                        <ResourceSelectDepartment key={key} department={key} />
                     ))
                 }
                 <div className="h-32 mt-2"></div>
@@ -39,21 +40,22 @@ export class ResourceUI extends React.Component<ResourceUIProps>{
         )
     }
     
-    public static modifyResourceForm(resourceID: string){
+    public static modifyResourceForm(resourceID?: string, department?: string){
         return(
-            <EditResourceDetails resourceId={resourceID} />
+            <EditResourceDetails resourceId={resourceID} department={department} />
         )
     }
 
     render() {
 
-        const { pageType, resourceId } = this.props;
+        const { pageType, resourceId, department } = this.props;
 
         return (
             <div>
                 {pageType === "list" && ResourceUI.displayList()}
                 {pageType === "detail" && resourceId !== undefined && ResourceUI.viewResource(resourceId)}
                 {pageType === "edit" && resourceId !== undefined && ResourceUI.modifyResourceForm(resourceId)}
+                {pageType === "add" && ResourceUI.modifyResourceForm(undefined, department)}
             </div>
         );
     }
