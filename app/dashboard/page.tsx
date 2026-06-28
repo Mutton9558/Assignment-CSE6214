@@ -1,6 +1,7 @@
 import { auth } from "@/auth";
 import Student from "../components/Dashboard/StudentDashboard";
 import ResourceManager from "../components/Dashboard/ResourceManagerDashboard";
+import AdminDashboard from "../components/Dashboard/AdminDashboard";
 
 interface PageProps {
   searchParams: Promise<{ default_sect?: string }>;
@@ -25,6 +26,9 @@ export default async function Dashboard({ searchParams }: PageProps) {
     
   } else if (userRole === "resource manager") {
     return <ResourceManager default_sect={default_sect} />;
+  
+  } else if (userRole === "admin") {
+    return <AdminDashboard />; 
     
   } else {
     return <div className="p-10 text-center text-red-500 font-bold">Unauthorized Role</div>;
