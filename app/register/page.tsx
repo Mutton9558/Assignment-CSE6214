@@ -2,6 +2,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { handleRegistration } from "@/app/actions/authActions";
+import { signIn } from "next-auth/react";
 import Input from "../components/input";
 import Button from "../components/Button";
 
@@ -13,15 +14,28 @@ export default function Register() {
     const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         const formData = new FormData(e.currentTarget);
-        
-        // 2. Call the secure server action
+
         const response = await handleRegistration(formData);
 
-        // 3. Handle the UI updates (Alerts & Redirects) based on the response
-        // Added optional chaining (?) in case response is undefined from the mismatch earlier
         if (response?.success) {
-            alert(response.message);
-            router.push("/dashboard"); 
+            const userId = formData.get("student-id") as string;
+            const password = formData.get("password") as string;
+
+            // After successful registration, automatically sign the user in
+            const signInResponse = await signIn("credentials", {
+                user_id: userId,
+                password: password,
+                redirect: false, // Manual Handle sign-in
+            });
+
+            if (signInResponse?.ok && !signInResponse.error) {
+                alert(response.message);
+                router.push("/dashboard");
+            } else {
+                // This case handles if registration is successful but login fails.
+                alert(`Registration successful, but auto-login failed. Please log in manually. Error: ${signInResponse?.error}`);
+                router.push("/login");
+            }
         } else {
             alert(`Registration failed: ${response?.message || "Unknown error"}`);
         }
