@@ -3,24 +3,29 @@ import Button from "./Button";
 import { DEPARTMENTS } from "../constants";
 import { useRef, useState } from "react";
 import { approveBooking, rejectBooking } from "../actions/BookingController";
+import { useRouter } from "next/router";
 
 interface BookingRequestCardProp extends React.HTMLAttributes<HTMLDivElement>{
     booking_id: string;
     booking_status: string;
+    booking_start: Date; 
+    booking_end: Date;
     userProfileImage?: string;
     userName: string;
     userRole: string;
+    resource_id: string;
     resourceDepartment: string;
     resourceName: string;
     userEmail: string;
 }
 
-export default function BookingRequestCard({booking_id, booking_status, userProfileImage, userName, userRole, resourceDepartment, resourceName, userEmail, ...props}: BookingRequestCardProp){
+export default function BookingRequestCard({booking_id, booking_status, booking_start, booking_end, userProfileImage, userName, userRole, resource_id, resourceDepartment, resourceName, userEmail, ...props}: BookingRequestCardProp){
     
     const [isPending, setIsPending] = useState(false);
     const [showRejectInput, setShowRejectInput] = useState(false);
     const [isProcessed, setIsProcessed] = useState(false);
     const [reason, setReason] = useState("");
+    const router = useRouter();
     
     if(userProfileImage === undefined){
         userProfileImage = defaultPfp;
@@ -38,7 +43,7 @@ export default function BookingRequestCard({booking_id, booking_status, userProf
         }
         setIsPending(true);
 
-        const success = await approveBooking(booking_id, userEmail, userName, resourceName);
+        const success = await approveBooking(booking_id, userEmail, userName, resource_id, resourceName, booking_start, booking_end);
         
         if(success.success){
             alert(`Successfully approved booking for resource ${resourceName} by ${userName}`);
@@ -82,7 +87,7 @@ export default function BookingRequestCard({booking_id, booking_status, userProf
     if (isProcessed) return null;
 
     return(
-        <div id="card-container" className="w-full h-48 bg-secondary mt-16 rounded-2xl p-4 overflow-hidden" {...props}>
+        <div onClick={() => router.push(`/booking_details/${booking_id}`)} id="card-container" className="w-full h-48 bg-secondary mt-16 rounded-2xl p-4 overflow-hidden" {...props}>
             <div id="card-header" className="flex flex-row justify-between w-full h-12">
                 <div id="user-info-section" className="flex flex-row justify-center items-center">
                     <div id="image-section" className="h-full">

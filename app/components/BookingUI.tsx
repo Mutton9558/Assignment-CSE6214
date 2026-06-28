@@ -2,6 +2,7 @@
 
 import React from "react";
 import { BookingRequestList } from "./BookingRequestList";
+import BookingList from "./BookingList";
 
 interface BookingUIProps{
     pageType: "list" | "request_list" | "detail" | "edit";
@@ -9,9 +10,16 @@ interface BookingUIProps{
 }
 
 export class BookingUI extends React.Component<BookingUIProps>{
+
+    public static displayAllBookings(){
+        return(
+            <BookingList />
+        )
+    }
+
     public static displayRequests(){
         return (
-            <div className="p-4 h-full max-w-screen mx-auto">
+            <div className="p-4 h-full max-w-full mx-auto">
                 <BookingRequestList />
             </div>
         );
@@ -23,6 +31,7 @@ export class BookingUI extends React.Component<BookingUIProps>{
 
         return (
             <div>
+                {pageType === "list" && BookingUI.displayAllBookings()}
                 {pageType === "request_list" && BookingUI.displayRequests()}
             </div>
         );

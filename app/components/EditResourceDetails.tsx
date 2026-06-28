@@ -41,6 +41,12 @@ export function EditResourceDetails({resourceId, department}: ResourceDetailsPro
         if(target && target.files){
             const file = target.files[0];
             if (file) {
+
+                if (!file.type.startsWith("image/")) {
+                    alert("Please select a valid image file.");
+                    return;
+                }
+
                 setNewImageFile(file);
                 setImageSource(URL.createObjectURL(file));
             }

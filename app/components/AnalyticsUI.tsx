@@ -5,9 +5,23 @@ import Button from "./Button";
 import { useState, useEffect } from "react";
 import { generateBookingAnalytics } from "../actions/AnalyticsController";
 import { AnalyticsData } from "@/types";
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
 
 const DashboardComponent: React.FC = () => {
 
+    const router = useRouter();
+    const { data: session, status } = useSession();
+    const userRole = session?.user?.role?.toLowerCase() || null;
+    const isResourceManager = userRole === "resource manager";
+
+    if(status === "loading"){
+        return <div className="w-72 h-16 bg-secondary/50 rounded-xl animate-pulse mt-1 mb-1" />;
+    }
+
+    if(!isResourceManager){
+        router.push('/');
+    }
     const [analyticsData, setAnalyticsData] = useState<AnalyticsData>();
 
     useEffect(() => {
@@ -25,7 +39,7 @@ const DashboardComponent: React.FC = () => {
         <div className="max-w-full min-h-screen">
             <header className="flex justify-between mb-6">
                 <div>
-                    <h1 className="text-2xl font-bold mb-4">Hi, John!</h1>
+                    <h1 className="text-2xl font-bold mb-4">Hi, {session?.user.name || "user"}!</h1>
                     <p>Analytics (18th - 24th May 2026)</p>
                 </div>
                 
