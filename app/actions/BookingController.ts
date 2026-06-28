@@ -268,3 +268,12 @@ export async function rejectBooking(bookingId: string, email: string, reason: st
         return {error: error}
     }
 }
+
+export async function getBookingWithinDuration(start: Timestamp, end: Timestamp){
+    try{
+        const bookingRef = await adminDb.collection('Bookings').where('booking_start', '>=', start).where('booking_start', '<=', end).get();
+        return bookingRef;
+    } catch (error){
+        return {error: error}
+    }
+}

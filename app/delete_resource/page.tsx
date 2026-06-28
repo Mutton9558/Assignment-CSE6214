@@ -4,6 +4,7 @@ import { useSearchParams } from 'next/navigation';
 import { deleteResource } from '@/app/actions/ResourceController';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
+import { useSession } from "next-auth/react";
 
 export default function DeleteResourceConfirmation(){
     
@@ -11,6 +12,17 @@ export default function DeleteResourceConfirmation(){
     const id = searchParams.get('id');
     const name = searchParams.get('name');
     const router = useRouter();
+    const { data: session, status } = useSession();
+    const userRole = session?.user?.role?.toLowerCase() || null;
+    const isResourceManager = userRole === "resource manager";
+
+    if(status === "loading"){
+        return <div className="w-72 h-16 bg-secondary/50 rounded-xl animate-pulse mt-1 mb-1" />;
+    }
+
+    if(!isResourceManager){
+        router.push('/');
+    }
 
     const [buffering, setBuffering] = useState(false);
 

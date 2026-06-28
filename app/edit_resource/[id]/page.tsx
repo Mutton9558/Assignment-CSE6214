@@ -2,13 +2,27 @@
 
 import { ResourceUI } from "@/app/components/ResourceUI";
 import { use } from "react";
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/router";
 
 interface ResourceDetailsPageProps{
     params: Promise<{id: string}>;
 }
 
 export default function ResourceDetailsPage({params}: ResourceDetailsPageProps){
+    const router = useRouter();
     const { id } = use(params);
+    const { data: session, status } = useSession();
+    const userRole = session?.user?.role?.toLowerCase() || null;
+    const isResourceManager = userRole === "resource manager";
+
+    if(status === "loading"){
+        return <div className="w-72 h-16 bg-secondary/50 rounded-xl animate-pulse mt-1 mb-1" />;
+    }
+
+    if(!isResourceManager){
+        router.push('/');
+    }
 
     return(
         <ResourceUI pageType="edit" resourceId={id}/>

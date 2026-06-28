@@ -44,18 +44,7 @@ export default function ResourceManager({ default_sect }: ResourceManagerDashboa
         switch (activeSection) {
             case "manage-booking":
                 return (
-                    <div className="p-6 min-h-screen w-full max-w-lg mx-auto">
-                        <header className="flex justify-between mb-6">
-                            <div>
-                                <h1 className="text-2xl font-bold mb-4">Hi, John!</h1>
-                                <p>Manage Pending Bookings</p>
-                            </div>
-                            
-                            <Button className="!w-10 !h-10 !p-2" buttonText="🔔" />
-                        </header>
-                        <BookingListUI pageType="list" />
-                    </div>
-                    
+                    <BookingListUI pageType="list" />
                 );
             case "manage-resources":
                 return <ResourceUI pageType="list" />;

@@ -2,6 +2,8 @@
 
 import { adminDb } from "@/lib/DatabaseInitializer";
 import { Timestamp, DocumentReference } from "firebase-admin/firestore";
+import { getBookingWithinDuration } from "./BookingController";
+import { getMaintenanceRequestWithinDuration } from "./MaintenanceController";
 
 export async function generateBookingAnalytics(){
     const today = new Date();
@@ -14,7 +16,11 @@ export async function generateBookingAnalytics(){
 
     try {
         // Fetch bookings
-        const bookingRef = await adminDb.collection('Bookings').where('booking_start', '>=', startTimestamp).where('booking_start', '<=', endTimestamp).get();
+        const bookingRef = await getBookingWithinDuration(startTimestamp, endTimestamp);
+        if ('error' in bookingRef) {
+            console.error(bookingRef.error);
+            return;
+        }
         const records: any[] = [];
         bookingRef.forEach((doc) => {
             records.push({ id: doc.id, ...doc.data() });
@@ -56,7 +62,11 @@ export async function generateBookingAnalytics(){
         const peakHour = hourlyHeatmap.indexOf(Math.max(...hourlyHeatmap));
 
         // get top 3 reported venues
-        const reportRef = await adminDb.collection('MaintenanceRequest').where('request_date', '>=', startTimestamp).where('request_date', '<=', endTimestamp).get();
+        const reportRef = await getMaintenanceRequestWithinDuration(startTimestamp, endTimestamp);
+        if ('error' in reportRef) {
+            console.error(reportRef.error);
+            return;
+        }
         const reports: any[] = [];
         reportRef.forEach((doc) => {
             reports.push({ id: doc.id, ...doc.data() });
@@ -122,6 +132,7 @@ export async function generateBookingAnalytics(){
             bookingCount: records.length,
             bookingTopResources: top3ResourcesWithNames,
             peakBookingHours: peakHour,
+            reportCount: reports.length,
             reportTopResources: top3ReportedWithNames
         };
     } catch (error) {
@@ -130,6 +141,7 @@ export async function generateBookingAnalytics(){
             bookingCount: 0,
             bookingTopResources: [],
             peakBookingHours: -1,
+            reportCount: 0,
             reportTopResources: []
         };
     }

@@ -4,6 +4,7 @@ import BookingCard from "./BookingCard";
 import BookingRequestCard from "./BookingRequestCard";
 import { fetchAllBooking } from "../actions/BookingController";
 import { Booking } from "@/types";
+import Button from "./Button";
 
 export function BookingRequestList(){
 
@@ -13,17 +14,30 @@ export function BookingRequestList(){
 
     useEffect(() => {
         async function getBookingList(){
-            const bookings = await fetchAllBooking();
-            const pending = bookings.filter(booking => booking.booking_status === "Awaiting Approval");
-            setBookingList(pending);
+            try {
+                const bookings = await fetchAllBooking();
+                const pending = bookings.filter(booking => booking.booking_status === "Awaiting Approval");
+                setBookingList(pending);
+            } catch (error) {
+                console.error(error);
+            } finally {
+                setLoading(false);
+            }
         }
 
         getBookingList();
-        setLoading(false);
     }, [])
 
     return(
-        <div className="w-full min-h-full">
+        <div className="max-w-full min-h-screen">
+            <header className="flex justify-between mb-6">
+                <div>
+                    <h1 className="text-2xl font-bold mb-4">Hi, John!</h1>
+                    <p>Manage Pending Bookings</p>
+                </div>
+                
+                <Button className="!w-10 !h-10 !p-2" buttonText="🔔" />
+            </header>
             <FilterButtons onClickHandler={setSelectedDept}/>
             {
                 loading ?
@@ -31,7 +45,7 @@ export function BookingRequestList(){
                     <p>Loading</p>
                 </div>
                 :
-                <div className="w-full overflow-hidden flex justify-center flex-col items-center mt-4">
+                <div className="flex flex-col gap-3 w-full mt-4 justify-center">
                     {(() => {
                         // filter the list based on status and department first
                         const filteredBookings = (bookingList || []).filter(booking => {
@@ -55,7 +69,9 @@ export function BookingRequestList(){
                                 />
                             ))
                         ) : (
-                            <p>No Bookings</p>
+                            <div className="w-full flex justify-center items-center py-12 text-gray-500 font-medium">
+                                <p>No Bookings</p>
+                            </div>
                         );
                     })()}
                 </div>

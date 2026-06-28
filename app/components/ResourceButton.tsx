@@ -2,6 +2,8 @@
 
 import { useRouter } from "next/navigation";
 import { FaRegEdit, FaTrash } from "react-icons/fa";
+import { useState } from "react";
+import { useSession } from "next-auth/react";
 
 interface ResourceButtonProp{
     ResourceID: string;
@@ -11,10 +13,18 @@ interface ResourceButtonProp{
     // EditAction: () => void;
 }
 
-export function ResourceButton({ResourceID, ResourceName, isResourceManager}: ResourceButtonProp){
+export function ResourceButton({ResourceID, ResourceName}: ResourceButtonProp){
 
     const router = useRouter();
 
+    const { data: session, status } = useSession();
+    const userRole = session?.user?.role?.toLowerCase() || null;
+    const isResourceManager = userRole === "resource manager";
+
+    if (status === "loading") {
+        return <div className="w-72 h-16 bg-secondary/50 rounded-xl animate-pulse mt-1 mb-1" />;
+    }
+    
     const handleClick = () => {
         router.push(`/resource_details/${ResourceID}?source=manage-resources`);
     }

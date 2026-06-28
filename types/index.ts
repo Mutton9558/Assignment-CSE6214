@@ -58,3 +58,19 @@ export interface Notification {
     isRead: boolean;
     targetUser: string;
 }
+
+export interface AnalyticsData {
+    bookingCount: number,
+    bookingTopResources: {
+        resourceId: string;
+        name: string;
+        count: number;
+    }[],
+    peakBookingHours: number,
+    reportCount: number,
+    reportTopResources: {
+        resourceId: string;
+        name: string;
+        count: number;
+    }[]
+}
