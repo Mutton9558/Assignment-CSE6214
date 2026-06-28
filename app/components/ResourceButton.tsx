@@ -16,7 +16,7 @@ export function ResourceButton({ResourceID, ResourceName, isResourceManager}: Re
     const router = useRouter();
 
     const handleClick = () => {
-        router.push(`/resource_details/${ResourceID}`)
+        router.push(`/resource_details/${ResourceID}?source=manage-resources`);
     }
 
     return(

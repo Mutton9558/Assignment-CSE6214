@@ -5,6 +5,7 @@ import { DocumentReference } from "firebase-admin/firestore";
 import { MaintenanceRequest } from "@/types";
 import { Timestamp } from "firebase-admin/firestore";
 import { transporter } from "@/lib/EmailInitializer";
+import { createNotification } from "./NotificationController";
 
 export async function fetchAllRequests() {
     try {
@@ -147,6 +148,16 @@ export async function getUserRequest(userId: string): Promise<MaintenanceRequest
 export async function createRequest(reportData: MaintenanceRequest) {
     try {
         await adminDb.collection("MaintenanceRequests").doc(reportData.fault_id).set(reportData);
+
+        const resourceManagersQuery = await adminDb.collection("Users")
+            .where("role", "==", "Resource Manager")
+            .get();
+
+        const notificationPromises = resourceManagersQuery.docs.map(async (doc) => {
+            createNotification(doc.id, "New Maintenance Request", `A new maintenance request has been made for ${reportData.faulty_resource_name}.`);
+        });
+
+        await Promise.all(notificationPromises);
         return { success: true };
     } catch (error) {
         console.error("Error submitting fault report:", error);
@@ -197,6 +208,12 @@ export async function scheduleService(requestId: string, resource: string, start
         };
 
         await transporter.sendMail(mailOptions);
+
+        const userQuery = await adminDb.collection("Users").where("email", "==", email).limit(1).get();
+        if (!userQuery.empty) {
+            const userId = userQuery.docs[0].id;
+            await createNotification(userId, "Maintenance Request Scheduled", `Your maintenance request "${title}" has been scheduled for service.`);
+        }
 
         return {success: true}
     } catch(error){

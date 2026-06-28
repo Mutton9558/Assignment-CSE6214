@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { createContext, useContext, useState, useEffect, ReactNode, useMemo } from 'react';
 import { useSession } from "next-auth/react";
 import { User } from '@/types';
 import { getUserProfile } from '@/app/actions/userActions';
@@ -35,8 +35,10 @@ export function UserProvider({ children }: { children: ReactNode }) {
         fetchUser();
     }, [session, status]);
 
+    const value = useMemo(() => ({ user, isLoading }), [user, isLoading]);
+
     return (
-        <UserContext.Provider value={{ user, isLoading }}>
+        <UserContext.Provider value={value}>
             {children}
         </UserContext.Provider>
     );
