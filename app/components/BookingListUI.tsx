@@ -10,7 +10,11 @@ interface BookingListUIProps{
 
 export class BookingListUI extends React.Component<BookingListUIProps>{
     public static displayList(){
-        return <BookingRequestList />;
+        return (
+            <div className="p-4 h-full max-w-screen mx-auto">
+                <BookingRequestList />
+            </div>
+        );
     }
 
     render() {

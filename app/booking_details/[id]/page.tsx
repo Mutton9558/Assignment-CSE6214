@@ -7,6 +7,7 @@ import { FiAlertOctagon } from "react-icons/fi";
 import { use } from "react";
 import NavBar, { NavItem } from "@/app/components/NavBar";
 import BackButton from "@/app/components/BackButton";
+import { useSession } from "next-auth/react";
 
 interface ResourceDetailsPageProps {
   params: Promise<{ id: string }>;
@@ -16,6 +17,14 @@ export default function ResourceDetailsPage({ params }: ResourceDetailsPageProps
   const { id } = use(params);
   const [actionTaken, setActionTaken] = useState<string | null>(null);
   const [activeSection, setActiveSection] = useState("booking");
+
+  const { data: session, status } = useSession();
+    const userRole = session?.user?.role?.toLowerCase() || null;
+    const isResourceManager = userRole === "resource manager";
+
+    if(status === "loading"){
+        return <div className="w-72 h-16 bg-secondary/50 rounded-xl animate-pulse mt-1 mb-1" />;
+    }
 
   const managerNavItems: NavItem[] = [
     { id: "booking", label: "Booking", icon: FaCalendarPlus },
@@ -154,26 +163,30 @@ export default function ResourceDetailsPage({ params }: ResourceDetailsPageProps
         </div>
 
         {/* Approval Section */}
-        <div className="rounded-3xl bg-gray-200 p-4 mt-6">
-          <p className="text-base font-bold text-black mb-3">
-            This request are still pending for approval
-          </p>
-          <div className="border-b border-gray-400 mb-3"></div>
-          <div className="flex gap-3">
-            <button
-              onClick={handleApprove}
-              className="flex-1 bg-green-400 hover:bg-green-500 text-black font-bold py-3 rounded-full transition"
-            >
-              Approve
-            </button>
-            <button
-              onClick={handleReject}
-              className="flex-1 bg-red-400 hover:bg-red-500 text-black font-bold py-3 rounded-full transition"
-            >
-              Reject
-            </button>
+        {
+          isResourceManager ? 
+          <div className="rounded-3xl bg-gray-200 p-4 mt-6">
+            <p className="text-base font-bold text-black mb-3">
+              This request are still pending for approval
+            </p>
+            <div className="border-b border-gray-400 mb-3"></div>
+            <div className="flex gap-3">
+              <button
+                onClick={handleApprove}
+                className="flex-1 bg-green-400 hover:bg-green-500 text-black font-bold py-3 rounded-full transition"
+              >
+                Approve
+              </button>
+              <button
+                onClick={handleReject}
+                className="flex-1 bg-red-400 hover:bg-red-500 text-black font-bold py-3 rounded-full transition"
+              >
+                Reject
+              </button>
+            </div>
           </div>
-        </div>
+          : null
+        }
       </div>
     </div>
   );

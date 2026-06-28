@@ -204,3 +204,12 @@ export async function scheduleService(requestId: string, resource: string, start
         return {error: error}
     }  
 }
+
+export async function getMaintenanceRequestWithinDuration(start: Timestamp, end: Timestamp){
+    try{
+        const requestRef = await adminDb.collection('MaintenanceRequest').where('request_date', '>=', start).where('request_date', '<=', end).get();
+        return requestRef;
+    } catch (error){
+        return {error: error}
+    }
+}

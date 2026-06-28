@@ -1,13 +1,12 @@
-"use client";
 import Login from "@/app/login/page";
 import { redirect } from "next/navigation";
+import { auth } from "@/auth"
 
-export default function page() {
-  const isAuthenticated = true; // This would also come from your authentication logic
+export default async function page() {
+  const isAuthenticated = await auth();
   
   if (isAuthenticated) {
     redirect("/dashboard");
-    return null; // Prevent rendering anything while redirecting
   } else {
     return <Login />;
   }
