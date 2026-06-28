@@ -1,7 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { MdHome, MdCalendarMonth, MdPerson } from "react-icons/md";
+import { useRouter } from "next/navigation";
+import NavBar, { NavItem } from "../components/NavBar";
+import { LuHouse, LuCalendarPlus, LuUsers } from "react-icons/lu";
+import { MdOutlinePerson } from "react-icons/md";
 
 interface Booking {
   id: string;
@@ -53,88 +56,109 @@ const mockStudents: Student[] = [
 ];
 
 export default function StudentFacultyHistoryPage() {
+  const router = useRouter();
   const [students] = useState<Student[]>(mockStudents);
   const [selected, setSelected] = useState<Student | null>(null);
 
+  const handleNavClick = (section: string) => {
+    if (section === "home") {
+      router.push("/dashboard");
+    } else if (section === "booking") {
+      router.push("/dashboard?tab=booking");
+    } else if (section === "profile") {
+      router.push("/dashboard?tab=profile");
+    } else if (section === "history") {
+      // Stay on this page - do nothing
+      return;
+    }
+  };
+
+  const staffNav: NavItem[] = [
+    { id: "home", label: "Home", icon: LuHouse },
+    { id: "booking", label: "Booking", icon: LuCalendarPlus },
+    { id: "history", label: "History", icon: LuUsers },
+    { id: "profile", label: "Profile", icon: MdOutlinePerson },
+  ];
+
   return (
-    <div className="h-full w-full max-w-lg mx-auto flex flex-col pb-32 bg-white">
-      <div className="p-6 border-b border-gray-300">
-        <h1 className="text-3xl font-bold text-black">Students & Faculties</h1>
-        <p className="mt-2 text-sm text-gray-600">View students and their booking history.</p>
-      </div>
-
-      <div className="p-6 space-y-4 flex-1 overflow-y-auto">
-        {students.map((s) => (
-          <button
-            key={s.id}
-            onClick={() => setSelected(s)}
-            className="w-full text-left bg-gray-50 border border-gray-200 rounded-2xl p-4 flex flex-col gap-1 hover:shadow-md transition"
-          >
-            <div className="flex justify-between items-center">
-              <div>
-                <p className="text-base font-semibold text-gray-900">{s.name}</p>
-                <p className="text-sm text-gray-600">{s.faculty}</p>
-              </div>
-              <div className="text-sm font-semibold text-gray-700">{s.matric}</div>
-            </div>
-          </button>
-        ))}
-
-        {selected ? (
-          <div className="rounded-3xl bg-gray-100 p-4">
-            <div className="flex items-center justify-between mb-3">
-              <div>
-                <p className="text-base font-semibold text-black">{selected.name}</p>
-                <p className="text-sm text-gray-600">{selected.faculty} • {selected.matric}</p>
-              </div>
-              <button
-                onClick={() => setSelected(null)}
-                className="text-sm text-blue-600 font-medium"
-              >
-                Close
-              </button>
-            </div>
-
-            <div className="space-y-3">
-              <h3 className="text-sm font-bold text-black">Booking History</h3>
-              {selected.bookings.length === 0 ? (
-                <p className="text-sm text-gray-600">No bookings found.</p>
-              ) : (
-                selected.bookings.map((b) => (
-                  <div key={b.id} className="bg-white rounded-xl border border-gray-200 p-3">
-                    <div className="flex justify-between">
-                      <div>
-                        <p className="text-sm font-semibold">{b.resource}</p>
-                        <p className="text-xs text-gray-600">{b.date} • {b.startTime} - {b.endTime}</p>
-                      </div>
-                      <div className={`text-sm font-semibold ${b.status === 'Completed' ? 'text-green-600' : b.status === 'Cancelled' ? 'text-red-500' : 'text-gray-700'}`}>
-                        {b.status}
-                      </div>
-                    </div>
-                  </div>
-                ))
-              )}
-            </div>
+    <div className="h-full bg-gray-50 flex flex-col overflow-hidden">
+      {/* Main Content */}
+      <div className="flex-1 overflow-y-auto pb-32">
+        <div className="w-full max-w-lg mx-auto px-4 pt-6">
+          <div className="bg-white rounded-2xl p-6 shadow-sm">
+            <h1 className="text-2xl font-bold text-gray-900">Students & Faculties</h1>
+            <p className="mt-1 text-sm text-gray-600">View students and their booking history.</p>
           </div>
-        ) : null}
 
+          <div className="mt-4 space-y-4 pb-4">
+            {students.map((s) => (
+              <button
+                key={s.id}
+                onClick={() => setSelected(s)}
+                className="w-full text-left bg-white border border-gray-200 rounded-2xl p-4 shadow-sm hover:shadow-md transition"
+              >
+                <div className="flex justify-between items-center">
+                  <div>
+                    <p className="text-base font-semibold text-gray-900">{s.name}</p>
+                    <p className="text-sm text-gray-600">{s.faculty}</p>
+                  </div>
+                  <div className="text-sm font-semibold text-gray-700">{s.matric}</div>
+                </div>
+              </button>
+            ))}
+
+            {selected && (
+              <div className="rounded-2xl bg-gray-100 p-4">
+                <div className="flex items-center justify-between mb-3">
+                  <div>
+                    <p className="text-base font-semibold text-gray-900">{selected.name}</p>
+                    <p className="text-sm text-gray-600">{selected.faculty} • {selected.matric}</p>
+                  </div>
+                  <button
+                    onClick={() => setSelected(null)}
+                    className="text-sm text-blue-600 font-medium"
+                  >
+                    Close
+                  </button>
+                </div>
+
+                <div className="space-y-3">
+                  <h3 className="text-sm font-bold text-gray-900">Booking History</h3>
+                  {selected.bookings.length === 0 ? (
+                    <p className="text-sm text-gray-600">No bookings found.</p>
+                  ) : (
+                    selected.bookings.map((b) => (
+                      <div key={b.id} className="bg-white rounded-xl border border-gray-200 p-3">
+                        <div className="flex justify-between">
+                          <div>
+                            <p className="text-sm font-semibold text-gray-900">{b.resource}</p>
+                            <p className="text-xs text-gray-600">{b.date} • {b.startTime} - {b.endTime}</p>
+                          </div>
+                          <div className={`text-sm font-semibold ${
+                            b.status === 'Completed' ? 'text-green-600' : 
+                            b.status === 'Cancelled' ? 'text-red-500' : 
+                            'text-gray-700'
+                          }`}>
+                            {b.status}
+                          </div>
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
       </div>
 
-      <div className="fixed bottom-8 left-1/2 -translate-x-1/2 z-50 drop-shadow-2xl">
-        <div className="w-fit bg-gray-300 rounded-full px-6 py-3 flex justify-center gap-8">
-          <button className="flex flex-col items-center gap-1 text-gray-700 hover:text-black">
-            <MdHome size={24} />
-            <span className="text-sm font-medium">Home</span>
-          </button>
-          <button className="flex flex-col items-center gap-1 text-gray-700 hover:text-black">
-            <MdCalendarMonth size={24} />
-            <span className="text-sm font-medium">Booking</span>
-          </button>
-          <button className="flex flex-col items-center gap-1 text-gray-700 hover:text-black">
-            <MdPerson size={24} />
-            <span className="text-sm font-medium">Profile</span>
-          </button>
-        </div>
+      {/* Fixed Bottom Navbar - Same as Staff Dashboard */}
+      <div className="fixed bottom-8 left-1/2 -translate-x-1/2 z-[999] drop-shadow-2xl">
+        <NavBar 
+          items={staffNav} 
+          activeSection="history" 
+          onSectionChange={handleNavClick} 
+        />
       </div>
     </div>
   );
