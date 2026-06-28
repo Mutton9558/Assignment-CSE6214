@@ -117,7 +117,9 @@ export default function HomeDashboard({ setActiveSection }: HomeProps) {
                         <div className="flex flex-col gap-2 w-1/2 pl-2">
                             {summary.upcomingEvents.length > 0 ? (
                                 summary.upcomingEvents.slice(0, 3).map((booking) => {
-                                    const timeframe = `${booking.booking_start.toLocaleDateString([], {day: '2-digit', month: '2-digit', year: 'numeric'})}, ${booking.booking_start.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} - ${booking.booking_end.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
+                                    const startDate = new Date(booking.booking_start);
+                                    const endDate = new Date(booking.booking_end);
+                                    const timeframe = `${startDate.toLocaleDateString([], {day: '2-digit', month: '2-digit', year: 'numeric'})}, ${endDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
                                     
                                     const statusColor = 
                                         booking.booking_status === "Booked" ? "bg-green-400" :
