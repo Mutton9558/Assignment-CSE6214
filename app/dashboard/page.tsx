@@ -1,6 +1,7 @@
 import { auth } from "@/auth";
 import Student from "../components/Dashboard/StudentDashboard";
 import ResourceManager from "../components/Dashboard/ResourceManagerDashboard";
+import StaffDashboard from "../components/Dashboard/StaffDashboard";
 
 interface PageProps {
   searchParams: Promise<{ default_sect?: string }>;
@@ -21,7 +22,7 @@ export default async function Dashboard({ searchParams }: PageProps) {
     return <Student default_sect={default_sect} />;
     
   } else if (userRole === "campus staff" || userRole === "staff") {
-    return <div>Staff Dashboard (to be implemented)</div>;
+    return <StaffDashboard default_sect={default_sect} />;
     
   } else if (userRole === "resource manager") {
     return <ResourceManager default_sect={default_sect} />;
