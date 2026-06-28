@@ -24,7 +24,7 @@ export default async function Dashboard({ searchParams }: PageProps) {
   } else if (userRole === "campus staff" || userRole === "staff") {
     return <div>Staff Dashboard (to be implemented)</div>;
     
-  } else if (userRole === "resourcemanager") {
+  } else if (userRole === "resource manager") {
     return <ResourceManager default_sect={default_sect} />;
   
   } else if (userRole === "admin") {

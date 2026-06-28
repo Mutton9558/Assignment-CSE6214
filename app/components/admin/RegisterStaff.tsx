@@ -38,10 +38,10 @@ export default function RegisterStaff({ setActiveSection }: Props) {
     return (
         <div className="p-6 h-full w-full max-w-lg mx-auto flex flex-col gap-4">
             <header className="flex justify-between items-start">
-                <button onClick={() => setActiveSection("manage-users")} className="flex items-center gap-2 cursor-pointer">
-                    <span className="text-lg">←</span>
+                <button onClick={() => setActiveSection("manage-users")} className="flex gap-2 cursor-pointer">
+                    <span className="text-lg items-center">←</span>
                     <div>
-                        <p className="font-bold text-sm">Back</p>
+                        <p className="font-bold text-sm text-left">Back</p>
                         <p className="text-xs text-gray-500">Register Staff</p>
                     </div>
                 </button>

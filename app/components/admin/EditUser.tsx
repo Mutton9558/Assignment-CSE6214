@@ -2,7 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { User } from "@/types";
-import { getUserById, updateUser, updateUserPassword } from "@/app/actions/adminActions";
+import { fetchUser, modifyUser } from "@/app/actions/adminActions";
+import { resetPassword } from "@/app/actions/UserController";
 import { MdOutlinePerson, MdOutlineMail, MdOutlinePhone, MdPassword } from "react-icons/md";
 import Input from "../input";
 import Toggle from "../toggleComponents";
@@ -22,8 +23,8 @@ export default function EditUser({ userId, setActiveSection }: Props) {
     const [error, setError] = useState("");
 
     useEffect(() => {
-        async function fetchUser() {
-            const data = await getUserById(userId);
+        async function loadUser() {
+            const data = await fetchUser(userId);
             if (data) {
                 setUser(data);
                 setFormData({ email: data.email || "", contactNumber: data.contact_number || "", newPassword: "" });
@@ -31,7 +32,7 @@ export default function EditUser({ userId, setActiveSection }: Props) {
             }
             setLoading(false);
         }
-        fetchUser();
+        loadUser();
     }, [userId]);
 
     async function handleSubmit(e: React.FormEvent) {
@@ -40,14 +41,14 @@ export default function EditUser({ userId, setActiveSection }: Props) {
         setError("");
 
         try {
-            await updateUser(userId, {
+            await modifyUser(userId, {
                 email: formData.email,
                 contact_number: formData.contactNumber,
                 two_factor_enabled: twoFactorEnabled
             });
 
             if (formData.newPassword) {
-                await updateUserPassword(userId, formData.newPassword);
+                await resetPassword(userId, formData.newPassword);
             }
 
             setActiveSection("user-details");
@@ -64,11 +65,11 @@ export default function EditUser({ userId, setActiveSection }: Props) {
     return (
         <div className="p-6 h-full w-full max-w-lg mx-auto flex flex-col gap-4">
             <header className="flex justify-between items-start">
-                <button onClick={() => setActiveSection("user-details")} className="flex items-center gap-2 cursor-pointer">
-                    <span className="text-lg">←</span>
+                <button onClick={() => setActiveSection("user-details")} className="flex gap-2 cursor-pointer">
+                    <span className="text-lg items-center">←</span>
                     <div>
-                        <p className="font-bold text-sm">Back</p>
-                        <p className="text-xs text-gray-500">Edit {user?.name}&apos;s Profile</p>
+                        <p className="font-bold text-sm text-left">Back</p>
+                        <p className="text-xs text-gray-500">Edit {user?.name}'s Profile</p>
                     </div>
                 </button>
             </header>

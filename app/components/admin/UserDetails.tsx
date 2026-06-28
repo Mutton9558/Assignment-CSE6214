@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { User } from "@/types";
-import { getUserById, deleteUser } from "@/app/actions/adminActions";
+import { fetchUser, deleteUser } from "@/app/actions/adminActions";
 import { MdOutlinePerson, MdOutlineMail, MdOutlinePhone, MdPassword } from "react-icons/md";
 import { FiEye, FiEyeOff } from "react-icons/fi";
 import Button from "../Button";
@@ -18,12 +18,12 @@ export default function UserDetails({ userId, setActiveSection }: Props) {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        async function fetchUser() {
-            const data = await getUserById(userId);
+        async function loadUser() {
+            const data = await fetchUser(userId);
             setUser(data);
             setLoading(false);
         }
-        fetchUser();
+        loadUser();
     }, [userId]);
 
     async function handleDelete() {
@@ -38,10 +38,10 @@ export default function UserDetails({ userId, setActiveSection }: Props) {
     return (
         <div className="p-6 h-full w-full max-w-lg mx-auto flex flex-col gap-4">
             <header className="flex justify-between items-start">
-                <button onClick={() => setActiveSection("manage-users")} className="flex items-center gap-2 cursor-pointer">
-                    <span className="text-lg">←</span>
+                <button onClick={() => setActiveSection("manage-users")} className="flex gap-2 cursor-pointer">
+                    <span className="text-lg items-center">←</span>
                     <div>
-                        <p className="font-bold text-sm">Back</p>
+                        <p className="font-bold text-sm text-left">Back</p>
                         <p className="text-xs text-gray-500">User List</p>
                     </div>
                 </button>
