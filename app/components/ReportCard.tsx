@@ -25,7 +25,7 @@ export default function ReportCard({ request, hidden }: { request: MaintenanceRe
     }, [request.request_date]);
 
     function onClickHandler(id: string){
-        router.push(`/report_details/${id}`);
+        router.push(`/report_details/${id}?source=reports`);
     }
 
     return (

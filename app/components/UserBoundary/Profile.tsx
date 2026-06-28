@@ -4,9 +4,10 @@ import ReportCard from "../ReportCard";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Booking, MaintenanceRequest, User } from "@/types";
-import { getStudentBookings } from "@/app/actions/BookingController";
+import { getUserBookings } from "@/app/actions/BookingController";
 import { getUserRequest } from "@/app/actions/MaintenanceController";
 import { useUser } from "@/app/components/UserBoundary/UserContext";
+import { signOut } from "next-auth/react";
 
 interface ProfileProps {
     setActiveSection: (section: string) => void;
@@ -34,7 +35,7 @@ export default function Profile({ setActiveSection, initialTab = "bookings" }: P
                 }
 
                 const [bookings, reports] = await Promise.all([
-                    getStudentBookings(userProfile.user_id),
+                    getUserBookings(),
                     getUserRequest(userProfile.user_id),
                 ]);
 
@@ -50,9 +51,11 @@ export default function Profile({ setActiveSection, initialTab = "bookings" }: P
 
     const now = new Date();
 
-    const upcomingEvents = myBooking.filter((event) => event.booking_start >= now);
-    const pastEvents = myBooking.filter((event) => event.booking_start < now);
+    const upcomingEvents = myBooking.filter((event) => new Date(event.booking_start) >= now);
+    const pastEvents = myBooking.filter((event) => new Date(event.booking_start) < now);
 
+    console.log("Upcoming Bookings:", upcomingEvents);
+    console.log("Past Bookings:", pastEvents);
     return(
         <div className="p-6 h-full w-full max-w-lg mx-auto">
             <header className="flex justify-between items-center mb-6">
@@ -64,7 +67,7 @@ export default function Profile({ setActiveSection, initialTab = "bookings" }: P
                 </div>
                 <div className="flex flex-row gap-3">
                     <Button className="!h-10" buttonText="Edit Profile" onClick={() => setActiveSection("edit-profile")} />
-                    <Button className="!w-10 !h-10" buttonText="🚪" onClick={() => router.push('/login')} />
+                    <Button className="!w-10 !h-10" buttonText="🚪" onClick={() => signOut({ callbackUrl: '/login' })} />
                 </div>
             </header>
             <div className="flex flex-col gap-4 w-full">

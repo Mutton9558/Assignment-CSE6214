@@ -51,6 +51,8 @@ export interface MaintenanceRequest{
 
 export interface Notification {
     notification_id: string;
+    type: "report" | "booking" | "general";
+    title: string;
     message: string;
     timestamp: Date;
     isRead: boolean;

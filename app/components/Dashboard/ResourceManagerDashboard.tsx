@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import NavBar, { NavItem } from "../NavBar";
 import { LuCalendarPlus, LuBookPlus } from "react-icons/lu";
 import { MdOutlineMonitorHeart, MdOutlineReportGmailerrorred } from "react-icons/md";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { BookingListUI } from "../BookingListUI";
 import { ResourceUI } from "../ResourceUI";
 import { AnalyticsUI } from "../AnalyticsUI";
@@ -16,18 +16,28 @@ interface ResourceManagerDashboardProp {
 
 export default function ResourceManager({ default_sect }: ResourceManagerDashboardProp) {
     const router = useRouter();
+    const searchParams = useSearchParams();
+    
+    const tabParam = searchParams.get("tab"); 
+    
+    const [activeSection, setActiveSection] = useState(tabParam || "manage-booking");
 
-    const [activeSection, setActiveSection] = useState("manage-booking");
+    useEffect(() => {
+        if (tabParam) setActiveSection(tabParam);
+    }, [tabParam]);
 
     const handleNavClick = (newSection: string) => {
-        setActiveSection(newSection); // 1. Change the UI
+        setActiveSection(newSection);
+        if (searchParams.get("tab")) {
+            router.replace("/dashboard", { scroll: false }); 
+        }
     };
 
     const studentNav : NavItem[] = [
         { id: "manage-booking", label: "Booking", icon: LuCalendarPlus },
         { id: "manage-resources", label: "Resources", icon: LuBookPlus },
         { id: "analytics", label: "Analytics", icon: MdOutlineMonitorHeart },
-        { id: "maintenance", label: "Maintenance", icon: MdOutlineReportGmailerrorred },
+        { id: "reports", label: "Maintenance", icon: MdOutlineReportGmailerrorred },
     ];
 
     const renderContent = () => {
@@ -51,7 +61,7 @@ export default function ResourceManager({ default_sect }: ResourceManagerDashboa
                 return <ResourceUI pageType="list" />;
             case "analytics":
                 return <AnalyticsUI />;
-            case "maintenance":
+            case "reports":
                 return <MaintenanceUI pageType="list" />;
             default:
                 return <div>Section not found</div>;
