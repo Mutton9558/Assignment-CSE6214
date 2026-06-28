@@ -1,198 +1,358 @@
 "use client";
 
-import { useState } from "react";
-import { MdHome, MdCalendarMonth, MdPerson } from "react-icons/md";
+import { useState, useEffect } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useSession } from "next-auth/react";
+import { MdArrowBack } from "react-icons/md";
+import { fetchBookingForEdit, submitEditedBooking } from "../actions/EditBookingController";
+
+interface EditBookingForm {
+  booking_id: string;
+  user_id: string;
+  fullName: string;
+  phone: string;
+  email: string;
+  startDate: string;
+  startTime: string;
+  endDate: string;
+  endTime: string;
+  purpose: string;
+  venue: string;
+  room: string;
+  resource_id: string;
+  equipments: string[];
+  prev_booking: string | null;
+}
 
 export default function EditBookingsPage() {
-  const [form, setForm] = useState({
-    userId: "251UC240TK",
-    fullName: "MUHAMMAD YUSUF BIN RIDUAN",
-    phone: "+601546821579",
-    email: "MUHAMMAD.YUSUF.RIDUAN1@student.mmu.edu",
-    startDate: "2026-05-29",
-    startTime: "08:00",
-    endDate: "2026-06-01",
-    endTime: "18:00",
-    purpose: "Annual General Meeting Chess Club",
-    venue: "Central Lecture Complex (CLC)",
-    room: "CNMX 1004",
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const bookingId = searchParams.get("id");
+  const { data: session, status } = useSession();
+  
+  const [form, setForm] = useState<EditBookingForm>({
+    booking_id: "",
+    user_id: "",
+    fullName: "",
+    phone: "",
+    email: "",
+    startDate: "",
+    startTime: "",
+    endDate: "",
+    endTime: "",
+    purpose: "",
+    venue: "",
+    room: "",
+    resource_id: "",
+    equipments: [],
+    prev_booking: null,
   });
+  const [loading, setLoading] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const handleChange = (field: keyof typeof form, value: string) => {
+  useEffect(() => {
+    if (bookingId) {
+      loadBooking(bookingId);
+    } else {
+      setError("No booking ID provided");
+      setLoading(false);
+    }
+  }, [bookingId]);
+
+  const loadBooking = async (id: string) => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      const result = await fetchBookingForEdit(id);
+      
+      if (result.error) {
+        setError(result.error);
+        setLoading(false);
+        return;
+      }
+
+      if (result.success && result.data) {
+        setForm(result.data);
+      }
+    } catch (err) {
+      console.error("Error fetching booking:", err);
+      setError("Failed to load booking details");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleChange = (field: keyof EditBookingForm, value: string) => {
     setForm((prev) => ({ ...prev, [field]: value }));
   };
 
   const handleDiscard = () => {
-    setForm({
-      userId: "251UC240TK",
-      fullName: "MUHAMMAD YUSUF BIN RIDUAN",
-      phone: "+601546821579",
-      email: "MUHAMMAD.YUSUF.RIDUAN1@student.mmu.edu",
-      startDate: "2026-05-29",
-      startTime: "08:00",
-      endDate: "2026-06-01",
-      endTime: "18:00",
-      purpose: "Annual General Meeting Chess Club",
-      venue: "Central Lecture Complex (CLC)",
-      room: "CNMX 1004",
-    });
+    router.back();
   };
 
-  const handleSubmit = (event: any) => {
-    event.preventDefault();
-    console.log("Booking form submitted", form);
-    alert("Booking changes saved.");
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    setError(null);
+
+    try {
+      const result = await submitEditedBooking({
+        booking_id: form.booking_id,
+        user_id: form.user_id,
+        resource_id: form.resource_id,
+        startDate: form.startDate,
+        startTime: form.startTime,
+        endDate: form.endDate,
+        endTime: form.endTime,
+        purpose: form.purpose,
+        prev_booking: form.prev_booking || form.booking_id,
+      });
+
+      if (result.error) {
+        setError(result.error);
+        setIsSubmitting(false);
+        return;
+      }
+
+      alert("Booking changes submitted for re-approval!");
+      router.push("/dashboard?tab=profile");
+    } catch (err) {
+      console.error("Error submitting edited booking:", err);
+      setError("Failed to submit changes. Please try again.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
+
+  const handleBack = () => {
+    router.push("/dashboard?tab=profile");
+  };
+
+  if (status === "loading" || loading) {
+    return (
+      <div className="h-full bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto"></div>
+          <p className="mt-4 text-gray-600">Loading booking details...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="h-full bg-gray-50 flex flex-col">
+        <div className="bg-white px-4 py-4 shadow-sm">
+          <div className="max-w-lg mx-auto flex items-center justify-center relative">
+            <button
+              onClick={handleBack}
+              className="absolute left-0 text-gray-600 hover:text-gray-900 transition"
+            >
+              <MdArrowBack size={22} />
+            </button>
+            <h1 className="text-base font-semibold text-gray-900">Edit Booking</h1>
+          </div>
+        </div>
+        <div className="flex-1 flex items-center justify-center p-6">
+          <div className="text-center">
+            <p className="text-red-500 font-semibold">{error}</p>
+            <button
+              onClick={handleBack}
+              className="mt-4 bg-blue-500 text-white px-6 py-2 rounded-xl"
+            >
+              Go Back
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="h-full w-full max-w-lg mx-auto flex flex-col pb-32 bg-white">
-      <div className="p-6 border-b border-gray-300">
-        <h1 className="text-3xl font-bold text-black">Edit Booking</h1>
-        <p className="mt-2 text-sm text-gray-600">Update your booking details before saving.</p>
+    <div className="h-full bg-gray-50 flex flex-col">
+      {/* Header */}
+      <div className="bg-white px-4 py-4 shadow-sm">
+        <div className="max-w-lg mx-auto flex items-center justify-center relative">
+          <button
+            onClick={handleBack}
+            className="absolute left-0 text-gray-600 hover:text-gray-900 transition"
+          >
+            <MdArrowBack size={22} />
+          </button>
+          <h1 className="text-base font-semibold text-gray-900">Edit Booking</h1>
+        </div>
       </div>
 
-      <form className="p-6 space-y-5 flex-1" onSubmit={handleSubmit}>
-        <div>
-          <label className="block text-base font-bold text-black mb-2">Student ID / Staff ID</label>
-          <p className="text-base font-semibold text-gray-800">{form.userId}</p>
-        </div>
+      {/* Main Content */}
+      <div className="flex-1 overflow-y-auto pb-8">
+        <div className="w-full max-w-lg mx-auto px-4 pt-4">
+          {/* Info Card */}
+          <div className="bg-yellow-50 rounded-2xl p-4 mb-4 border border-yellow-200">
+            <p className="text-sm text-yellow-800">
+              ⚠️ Editing this booking will create a new request that requires 
+              <span className="font-semibold"> re-approval</span> from the Resource Manager.
+            </p>
+          </div>
 
-        <div>
-          <label className="block text-base font-bold text-black mb-2">Full Name</label>
-          <p className="text-base font-semibold text-gray-800">{form.fullName}</p>
-        </div>
+          <form className="space-y-4 pb-4" onSubmit={handleSubmit}>
+            {/* User Info (Read-only) */}
+            <div className="bg-white rounded-2xl p-4 shadow-sm">
+              <label className="block text-xs font-medium text-gray-500 mb-1">Student ID / Staff ID</label>
+              <p className="text-sm font-semibold text-gray-900">{form.user_id}</p>
+            </div>
 
-        <div>
-          <label className="block text-base font-bold text-black mb-2">Number Phone</label>
-          <p className="text-base font-semibold text-gray-800">{form.phone}</p>
-        </div>
+            <div className="bg-white rounded-2xl p-4 shadow-sm">
+              <label className="block text-xs font-medium text-gray-500 mb-1">Full Name</label>
+              <p className="text-sm font-semibold text-gray-900">{form.fullName}</p>
+            </div>
 
-        <div>
-          <label className="block text-base font-bold text-black mb-2">User Email</label>
-          <p className="text-base font-semibold text-gray-800">{form.email}</p>
-        </div>
+            <div className="bg-white rounded-2xl p-4 shadow-sm">
+              <label className="block text-xs font-medium text-gray-500 mb-1">Phone Number</label>
+              <p className="text-sm font-semibold text-gray-900">{form.phone}</p>
+            </div>
 
-        <div className="grid gap-4">
-          <div>
-            <label className="block text-base font-bold text-black mb-2">Starting Booking Time</label>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="bg-white rounded-2xl p-4 shadow-sm">
+              <label className="block text-xs font-medium text-gray-500 mb-1">Email</label>
+              <p className="text-sm font-semibold text-gray-900">{form.email}</p>
+            </div>
+
+            {/* Editable Fields */}
+            <div className="bg-white rounded-2xl p-4 shadow-sm">
+              <label className="block text-sm font-semibold text-gray-700 mb-2">
+                Starting Booking Time <span className="text-red-500">*</span>
+              </label>
+              <div className="grid grid-cols-2 gap-3">
+                <input
+                  type="date"
+                  value={form.startDate}
+                  onChange={(e) => handleChange("startDate", e.target.value)}
+                  className="w-full bg-gray-100 rounded-xl px-4 py-3 text-sm text-gray-800 outline-none focus:ring-2 focus:ring-blue-400"
+                  required
+                />
+                <input
+                  type="time"
+                  value={form.startTime}
+                  onChange={(e) => handleChange("startTime", e.target.value)}
+                  className="w-full bg-gray-100 rounded-xl px-4 py-3 text-sm text-gray-800 outline-none focus:ring-2 focus:ring-blue-400"
+                  required
+                />
+              </div>
+            </div>
+
+            <div className="bg-white rounded-2xl p-4 shadow-sm">
+              <label className="block text-sm font-semibold text-gray-700 mb-2">
+                Ending Booking Time <span className="text-red-500">*</span>
+              </label>
+              <div className="grid grid-cols-2 gap-3">
+                <input
+                  type="date"
+                  value={form.endDate}
+                  onChange={(e) => handleChange("endDate", e.target.value)}
+                  className="w-full bg-gray-100 rounded-xl px-4 py-3 text-sm text-gray-800 outline-none focus:ring-2 focus:ring-blue-400"
+                  required
+                />
+                <input
+                  type="time"
+                  value={form.endTime}
+                  onChange={(e) => handleChange("endTime", e.target.value)}
+                  className="w-full bg-gray-100 rounded-xl px-4 py-3 text-sm text-gray-800 outline-none focus:ring-2 focus:ring-blue-400"
+                  required
+                />
+              </div>
+            </div>
+
+            <div className="bg-white rounded-2xl p-4 shadow-sm">
+              <label className="block text-sm font-semibold text-gray-700 mb-2">
+                Booking Purpose <span className="text-red-500">*</span>
+              </label>
               <input
-                type="date"
-                value={form.startDate}
-                onChange={(e) => handleChange("startDate", e.target.value)}
-                className="w-full bg-gray-300 rounded-full px-4 py-3 text-base text-gray-800 outline-none focus:ring-2 focus:ring-blue-400"
-                required
-              />
-              <input
-                type="time"
-                value={form.startTime}
-                onChange={(e) => handleChange("startTime", e.target.value)}
-                className="w-full bg-gray-300 rounded-full px-4 py-3 text-base text-gray-800 outline-none focus:ring-2 focus:ring-blue-400"
+                type="text"
+                value={form.purpose}
+                onChange={(e) => handleChange("purpose", e.target.value)}
+                placeholder="Enter booking purpose"
+                className="w-full bg-gray-100 rounded-xl px-4 py-3 text-sm text-gray-800 outline-none focus:ring-2 focus:ring-blue-400"
                 required
               />
             </div>
-          </div>
 
-          <div>
-            <label className="block text-base font-bold text-black mb-2">Ending Booking Time</label>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="bg-white rounded-2xl p-4 shadow-sm">
+              <label className="block text-sm font-semibold text-gray-700 mb-2">
+                Venue
+              </label>
               <input
-                type="date"
-                value={form.endDate}
-                onChange={(e) => handleChange("endDate", e.target.value)}
-                className="w-full bg-gray-300 rounded-full px-4 py-3 text-base text-gray-800 outline-none focus:ring-2 focus:ring-blue-400"
-                required
-              />
-              <input
-                type="time"
-                value={form.endTime}
-                onChange={(e) => handleChange("endTime", e.target.value)}
-                className="w-full bg-gray-300 rounded-full px-4 py-3 text-base text-gray-800 outline-none focus:ring-2 focus:ring-blue-400"
+                type="text"
+                value={form.venue}
+                onChange={(e) => handleChange("venue", e.target.value)}
+                placeholder="Venue name"
+                className="w-full bg-gray-100 rounded-xl px-4 py-3 text-sm text-gray-800 outline-none focus:ring-2 focus:ring-blue-400"
                 required
               />
             </div>
-          </div>
-        </div>
 
-        <div>
-          <label className="block text-base font-bold text-black mb-2">Booking Purpose</label>
-          <input
-            type="text"
-            value={form.purpose}
-            onChange={(e) => handleChange("purpose", e.target.value)}
-            placeholder="Annual General Meeting Chess Club"
-            className="w-full bg-gray-300 rounded-full px-4 py-3 text-base text-gray-800 outline-none focus:ring-2 focus:ring-blue-400"
-            required
-          />
-        </div>
+            <div className="bg-white rounded-2xl p-4 shadow-sm">
+              <label className="block text-sm font-semibold text-gray-700 mb-2">
+                Room
+              </label>
+              <input
+                type="text"
+                value={form.room}
+                onChange={(e) => handleChange("room", e.target.value)}
+                placeholder="Room number"
+                className="w-full bg-gray-100 rounded-xl px-4 py-3 text-sm text-gray-800 outline-none focus:ring-2 focus:ring-blue-400"
+                required
+              />
+            </div>
 
-        <div>
-          <label className="block text-base font-bold text-black mb-2">Venue</label>
-          <input
-            type="text"
-            value={form.venue}
-            onChange={(e) => handleChange("venue", e.target.value)}
-            placeholder="Central Lecture Complex (CLC)"
-            className="w-full bg-gray-300 rounded-full px-4 py-3 text-base text-gray-800 outline-none focus:ring-2 focus:ring-blue-400"
-            required
-          />
-        </div>
+            {/* Equipment List */}
+            <div className="bg-white rounded-2xl p-4 shadow-sm">
+              <label className="block text-sm font-semibold text-gray-700 mb-2">
+                Resource Equipments
+              </label>
+              <div className="flex flex-wrap gap-2">
+                {form.equipments && form.equipments.length > 0 ? (
+                  form.equipments.map((equipment, index) => (
+                    <span key={index} className="bg-gray-100 rounded-full px-3 py-1 text-xs text-gray-700">
+                      {equipment}
+                    </span>
+                  ))
+                ) : (
+                  <p className="text-sm text-gray-500">No equipments listed</p>
+                )}
+              </div>
+            </div>
 
-        <div>
-          <label className="block text-base font-bold text-black mb-2">Room</label>
-          <input
-            type="text"
-            value={form.room}
-            onChange={(e) => handleChange("room", e.target.value)}
-            placeholder="CNMX 1004"
-            className="w-full bg-gray-300 rounded-full px-4 py-3 text-base text-gray-800 outline-none focus:ring-2 focus:ring-blue-400"
-            required
-          />
-        </div>
+            {/* Re-approval Warning */}
+            <div className="rounded-2xl bg-blue-50 p-4 border border-blue-200">
+              <p className="text-sm text-blue-800">
+                📝 Your edited booking will be submitted for <span className="font-semibold">re-approval</span>. 
+                The original booking will remain active until the new one is approved.
+              </p>
+            </div>
 
-        <div className="rounded-3xl bg-gray-200 p-4">
-          <p className="text-base font-semibold text-black mb-2">Resource Details</p>
-          <div className="text-sm text-gray-700 space-y-2">
-            <div className="rounded-3xl bg-white p-3">Air Conditioner</div>
-            <div className="rounded-3xl bg-white p-3">AV System</div>
-            <div className="rounded-3xl bg-white p-3">Projector</div>
-            <div className="rounded-3xl bg-white p-3">Computer</div>
-            <div className="rounded-3xl bg-white p-3">150 Audience Seats</div>
-            <div className="rounded-3xl bg-white p-3">Whiteboard</div>
-          </div>
-        </div>
-
-        <div className="flex flex-col gap-3">
-          <button
-            type="button"
-            onClick={handleDiscard}
-            className="w-full bg-gray-300 hover:bg-gray-350 text-black font-semibold py-3 rounded-full transition"
-          >
-            Discard Changes
-          </button>
-          <button
-            type="submit"
-            className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-full transition"
-          >
-            Save Changes
-          </button>
-        </div>
-      </form>
-
-      <div className="fixed bottom-8 left-1/2 -translate-x-1/2 z-50 drop-shadow-2xl">
-        <div className="w-fit bg-gray-300 rounded-full px-6 py-3 flex justify-center gap-8">
-          <button className="flex flex-col items-center gap-1 text-gray-700 hover:text-black">
-            <MdHome size={24} />
-            <span className="text-sm font-medium">Home</span>
-          </button>
-          <button className="flex flex-col items-center gap-1 text-gray-700 hover:text-black">
-            <MdCalendarMonth size={24} />
-            <span className="text-sm font-medium">Booking</span>
-          </button>
-          <button className="flex flex-col items-center gap-1 text-gray-700 hover:text-black">
-            <MdPerson size={24} />
-            <span className="text-sm font-medium">Profile</span>
-          </button>
+            {/* Buttons */}
+            <div className="flex flex-col gap-3 pt-2">
+              <button
+                type="button"
+                onClick={handleDiscard}
+                className="w-full bg-gray-200 hover:bg-gray-300 text-gray-800 font-semibold py-3 rounded-xl text-sm transition"
+              >
+                Discard Changes
+              </button>
+              <button
+                type="submit"
+                disabled={isSubmitting}
+                className={`w-full font-semibold py-3 rounded-xl text-sm transition ${
+                  isSubmitting
+                    ? "bg-gray-400 text-white cursor-not-allowed"
+                    : "bg-blue-500 hover:bg-blue-600 text-white"
+                }`}
+              >
+                {isSubmitting ? "Submitting..." : "Submit for Re-approval"}
+              </button>
+            </div>
+          </form>
         </div>
       </div>
     </div>
