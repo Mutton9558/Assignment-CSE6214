@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import BackButton from "../components/BackButton";
 import { useUser, UserProvider } from "../components/UserBoundary/UserContext";
-import { getStudentBookings } from "../actions/BookingController";
+import { getUserBookings } from "../actions/BookingController";
 import { Booking } from "@/types";
 
 function CalendarView() {
@@ -16,7 +16,7 @@ function CalendarView() {
         const fetchBookings = async () => {
             if (!isUserLoading && user?.user_id) {
                 try {
-                    const bookings = await getStudentBookings(user.user_id);
+                    const bookings = await getUserBookings();
                     setMyBookings(bookings);
                 } catch (error) {
                     console.error("Failed to fetch bookings:", error);
@@ -56,7 +56,7 @@ function CalendarView() {
     const eventsThisMonth = myBookings.filter(event => {
         const eventDate = new Date(event.booking_start);
         return eventDate.getFullYear() === currentYear && eventDate.getMonth() === currentMonth;
-    }).sort((a, b) => a.booking_start.getTime() - b.booking_start.getTime());
+    }).sort((a, b) => new Date(a.booking_start).getTime() - new Date(b.booking_start).getTime());
 
     return(
         <div className="p-6 h-full w-full max-w-lg mx-auto flex flex-col">
@@ -95,7 +95,9 @@ function CalendarView() {
                                 <p>Loading events...</p>
                             ) : eventsThisMonth.length > 0 ? (
                                 eventsThisMonth.map((booking) => {
-                                    const timeframe = `${booking.booking_start.toLocaleDateString([], {day: '2-digit', month: '2-digit', year: 'numeric'})}, ${booking.booking_start.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} - ${booking.booking_end.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
+                                    const startDate = new Date(booking.booking_start);
+                                    const endDate = new Date(booking.booking_end);
+                                    const timeframe = `${startDate.toLocaleDateString([], {day: '2-digit', month: '2-digit', year: 'numeric'})}, ${startDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} - ${endDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
                                     
                                     const statusColor = 
                                         booking.booking_status === "Booked" ? "bg-green-400" :

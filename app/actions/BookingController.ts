@@ -1,64 +1,102 @@
 "use server";
 
 import { adminDb } from "@/lib/DatabaseInitializer";
-import { Booking, Resource, User } from "@/types";
+import { Booking, Resource, User, Notification } from "@/types";
 import { Timestamp, DocumentReference } from "firebase-admin/firestore";
 import { cleanFirestoreData } from "@/lib/utils";
 import { transporter } from "@/lib/EmailInitializer";
+import { auth } from "@/auth";
+import { createNotification } from "./NotificationController";
 
-export async function getStudentBookings(userId: string): Promise<Booking[]> {
+export async function getUserBookings(): Promise<Booking[]> {
     try {
-        console.log(`[BookingController] Fetching bookings for user: ${userId}`);
+        const session = await auth();
+        const userId = String((session?.user as any)?.user_id || session?.user?.id);
+
+        if (!userId) {
+            console.error("[BookingController] Not authenticated");
+            return [];
+        }
+
+        console.log(`[BookingController] Fetching bookings matching reference: Users/${userId}`);
         const userRef = adminDb.collection('Users').doc(userId);
         const snapshot = await adminDb.collection('Bookings')
             .where('booking_owner', '==', userRef)
             .get();
 
         if (snapshot.empty) {
-            console.log(`[BookingController] No bookings found for user: ${userId}`);
             return [];
         }
 
-        const bookingList:Booking[] = [];
+        const bookingList: any[] = [];
         for (const doc of snapshot.docs) {
             const data = doc.data();
             if (data) {
-                const ownerSnap = await (data.booking_owner as DocumentReference).get();
-                const ownerData = ownerSnap.data();
-
-                const resourceRef = data.resource as DocumentReference;
-                const resourceSnap = await resourceRef.get();
-                const resourceData = resourceSnap.data();
-
-                if (ownerData && resourceData) {
+                try {
+                    // 1. Resolve Owner safely
+                    const ownerSnap = await (data.booking_owner as DocumentReference).get();
+                    const ownerData = ownerSnap.data() || {};
                     const owner: User = {
                         user_id: ownerSnap.id,
                         ...cleanFirestoreData(ownerData),
                     } as User;
 
-                    const resource: Resource = {
-                        resource_id: resourceSnap.id,
-                        resource_name: resourceData.resource_name,
-                        resource_dept: resourceData.resource_dept,
-                        resource_img_url: resourceData.resource_img_url,
-                        resource_status: resourceData.status,
-                        resource_equipments: resourceData.resource_equipments
+                    // 2. Resolve Resource safely (with fallback!)
+                    let resource: Resource = {
+                        resource_id: "unknown",
+                        resource_name: "Unknown Resource (Data Error)",
+                        resource_dept: "N/A",
+                        resource_status: "Available"
                     };
+
+                    // Check if it's actually a reference before trying to get it
+                    if (data.resource && typeof data.resource.get === 'function') {
+                        const resourceSnap = await (data.resource as DocumentReference).get();
+                        const resourceData = resourceSnap.data();
+                        
+                        if (resourceData) {
+                            resource = {
+                                resource_id: resourceSnap.id,
+                                resource_name: resourceData.resource_name || "Unnamed",
+                                resource_dept: resourceData.resource_dept || "N/A",
+                                resource_img_url: resourceData.resource_img_url,
+                                resource_status: resourceData.status || "Available",
+                                resource_equipments: resourceData.resource_equipments
+                            };
+                        }
+                    } else if (typeof data.resource === 'object' && data.resource.resource_name) {
+                        // Scenario B: It was saved as a Map/Object (Old Test Bookings)
+                        resource = {
+                            resource_id: data.resource.resource_id || "unknown",
+                            resource_name: data.resource.resource_name,
+                            resource_dept: data.resource.resource_dept || "N/A",
+                            resource_img_url: data.resource.resource_img_url,
+                            resource_status: data.resource.resource_status || "Available",
+                            resource_equipments: data.resource.resource_equipments
+                        };
+                    } else {
+                        console.warn(`[BookingController] Warning: Booking ${doc.id} is missing resource field.`);
+                    }
 
                     bookingList.push({
                         booking_id: doc.id,
                         booking_owner: owner,
                         resource: resource,
-                        booking_start: (data.booking_start as Timestamp).toDate(),
-                        booking_end: (data.booking_end as Timestamp).toDate(),
-                        booking_status: data.booking_status,
-                        booking_reason: data.booking_reason,
-                        request_created_at: (data.request_created_at as Timestamp).toDate(),
-                        prev_booking: data.prev_booking
+                        // Safely handle both Firestore Timestamps and strings
+                        booking_start: data.booking_start?.toDate ? data.booking_start.toDate().toISOString() : data.booking_start,
+                        booking_end: data.booking_end?.toDate ? data.booking_end.toDate().toISOString() : data.booking_end,
+                        booking_status: data.booking_status || "Unknown",
+                        booking_reason: data.booking_reason || "",
+                        request_created_at: data.request_created_at?.toDate ? data.request_created_at.toDate().toISOString() : data.request_created_at,
+                        prev_booking: data.prev_booking || null
                     });
+                    
+                } catch (err) {
+                    console.error(`[BookingController] Error processing booking doc ${doc.id}:`, err);
                 }
             }
         }
+        
         console.log(`[BookingController] Found ${bookingList.length} bookings for user: ${userId}`);
         return bookingList;
     } catch (error) {
@@ -73,9 +111,19 @@ export async function createBooking(bookingData: Booking) {
             throw new Error("Booking end time must be after start time");
         }
 
-        await adminDb.collection("bookings").add({
+        await adminDb.collection("Bookings").add({
             ...bookingData,
         });
+
+        const resourceManagersQuery = await adminDb.collection("Users")
+            .where("role", "==", "Resource Manager")
+            .get();
+
+        const notificationPromises = resourceManagersQuery.docs.map(async (doc) => {
+            createNotification(doc.id, "New Booking Request", `A new booking request has been made for ${bookingData.resource.resource_name}.`);
+        });
+
+        await Promise.all(notificationPromises);
         return { success: true, message: "Booking created successfully" };
     } catch (error) {
         console.error("Error creating booking:", error);
@@ -117,8 +165,8 @@ export async function fetchAllBooking(){
                 bookingList.push({
                     booking_id: doc.id,
                     booking_owner: owner,
-                    booking_start: data.booking_start.toDate(),
-                    booking_end: data.booking_end.toDate(),
+                    booking_start: data.booking_start.toDate().toISOString(),
+                    booking_end: data.booking_end.toDate().toISOString(),
                     booking_status: data.booking_status,
                     booking_reason: data.booking_reason,
                     resource: resource,
@@ -169,6 +217,8 @@ export async function approveBooking(bookingId: string, email: string, name: str
 
         await transporter.sendMail(mailOptions);
 
+        await createNotification(bookingId, "Booking Approved", `Your booking request for ${resource} has been approved.`);
+
         return {success: true}
     } catch (error){
         console.log(error);
@@ -209,6 +259,8 @@ export async function rejectBooking(bookingId: string, email: string, reason: st
         };
 
         await transporter.sendMail(mailOptions);
+
+        await createNotification(bookingId, "Booking Rejected", `Your booking request for ${resource} has been rejected. Reason: ${reason}`);
 
         return {success: true}
     } catch (error){

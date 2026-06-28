@@ -1,5 +1,5 @@
 import Link from "next/link"
-import { useRouter } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
 
 interface BackButtonProp{
     buttonName: string,
@@ -9,10 +9,19 @@ interface BackButtonProp{
 export default function BackButton({buttonName, buttonDesc}: BackButtonProp){
 
     const router = useRouter();
+    const searchParams = useSearchParams();
+
+    const handleBackClick = () => {
+        const source = searchParams.get("source");
+        if (source)
+            router.push(`/dashboard?tab=${source}`);
+        else
+            router.back();
+    }
     
     return(
-        <button onClick={() => router.back()} id="back-btn" className="flex flex-row w-fit p-2 h-20 cursor-pointer">
-            <div id="left side" className="w-8 h-10 flex items-center">
+        <button onClick={handleBackClick} id="back-btn" className="flex flex-row w-fit h-20 p-4 cursor-pointer">
+            <div id="left side" className="w-8 h-10 items-center">
                 <p>
                     ←
                 </p>
