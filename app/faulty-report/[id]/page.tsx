@@ -22,7 +22,30 @@ export default function FaultReportPage() {
   });
   const [images, setImages] = useState<string[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
+useEffect(() => {
+    const fetchVenue = async () => {
+      // Use the string version we created above
+      if (!resourceIdFromUrl) return;
+      
+      try {
+        const resource = await fetchResource(resourceIdFromUrl);
+        
+        // FIX 2: Check if resource exists before accessing properties
+        if (resource) {
+            setForm((prev) => ({ ...prev, location: resource.name }));
+        } else {
+            setForm((prev) => ({ ...prev, location: "Venue not found" }));
+        }
+      } catch (error) {
+        console.error("Error fetching venue:", error);
+        setForm((prev) => ({ ...prev, location: "Unknown Venue" }));
+      } finally {
+        setIsSubmitting(false);
+      }
+    };
 
+    fetchVenue();
+  }, [resourceIdFromUrl]);
   const handleChange = (field: keyof FaultReport, value: string) => {
     setForm((prev) => ({ ...prev, [field]: value }));
   };
