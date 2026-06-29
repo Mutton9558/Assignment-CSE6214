@@ -10,6 +10,7 @@ import PreBooking from "../preBookingStaff";
 import VenueBooking from "../VenueBooking";
 import Profile from "../UserBoundary/Profile";
 import EditProfile from "../UserBoundary/EditProfile";
+import SettingsPage from "../settings";
 import { UserProvider } from "../UserBoundary/UserContext";
 // Don't import the page - we'll use router to navigate
 
@@ -79,13 +80,15 @@ export default function Staff({ default_sect }: StaffDashboardProp) {
             case "booking":
                 return <PreBooking setActiveSection={setActiveSection} setBookingData={setBookingData} />;
             case "venue-booking":
-                return <VenueBooking setActiveSection={setActiveSection} bookingData={bookingData} />;
+                return <VenueBooking setActiveSection={setActiveSection} bookingData={bookingData} setBookingData={setBookingData} />;
             case "profile":
                 return <Profile setActiveSection={setActiveSection} initialTab="bookings" />;
             case "edit-profile":
                 return <EditProfile setActiveSection={setActiveSection} />;
             case "profile-reports":
                 return <Profile setActiveSection={setActiveSection} initialTab="reports" />
+            case "settings":
+                return <SettingsPage setActiveSection={setActiveSection} />;
             default:
                 return <div>Section not found</div>;
         }

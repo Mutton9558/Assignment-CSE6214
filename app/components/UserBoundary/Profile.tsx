@@ -3,11 +3,10 @@ import BookingCard from "../BookingCard";
 import ReportCard from "../ReportCard";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { Booking, MaintenanceRequest, User } from "@/types";
+import { Booking, MaintenanceRequest } from "@/types";
 import { getUserBookings } from "@/app/actions/BookingController";
 import { getUserRequest } from "@/app/actions/MaintenanceController";
 import { useUser } from "@/app/components/UserBoundary/UserContext";
-import { signOut } from "next-auth/react";
 
 interface ProfileProps {
     setActiveSection: (section: string) => void;
@@ -67,7 +66,7 @@ export default function Profile({ setActiveSection, initialTab = "bookings" }: P
                 </div>
                 <div className="flex flex-row gap-3">
                     <Button className="!h-10" buttonText="Edit Profile" onClick={() => setActiveSection("edit-profile")} />
-                    <Button className="!w-10 !h-10" buttonText="🚪" onClick={() => signOut({ redirectTo: '/login' })} />
+                    <Button className="!w-10 !h-10" buttonText="⚙️" onClick={() => setActiveSection("settings")} />
                 </div>
             </header>
             <div className="flex flex-col gap-4 w-full">

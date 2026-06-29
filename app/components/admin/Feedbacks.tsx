@@ -20,15 +20,6 @@ export default function Feedbacks({ setActiveSection }: { setActiveSection: (sec
     const [feedbacks, setFeedbacks] = useState<Feedback[]>([]);
     const [fetching, setFetching] = useState(true);
 
-    // useEffect(() => {
-    //     async function fetchFeedbacks() {
-    //         const data = await getAllFeedbacks();
-    //         setFeedbacks(data as Feedback[]);
-    //         setFetching(false);
-    //     }
-    //     fetchFeedbacks();
-    // }, []);
-
     function getGreeting() {
         const h = new Date().getHours();
         if (h < 12) return "Good Morning";
