@@ -105,6 +105,8 @@ export function EditResourceDetails({resourceId, department}: ResourceDetailsPro
 
             const { data } = supabase.storage.from('resource_image').getPublicUrl(filePath);
             imageUrl = data.publicUrl;
+        } else {
+            imageUrl = imageSource;
         }
         if(resourceId === undefined){
             const payload: Resource = {
@@ -119,7 +121,7 @@ export function EditResourceDetails({resourceId, department}: ResourceDetailsPro
             const res = await addResource(payload);
             if(res?.success){
                 alert('Successfully added resource!');
-                redirect('/manage_resource')
+                redirect('/dashboard')
             } else {
                 if(res.duplicateError){
                     alert('Resource with such name exists!');
@@ -132,7 +134,7 @@ export function EditResourceDetails({resourceId, department}: ResourceDetailsPro
                 const res = await modifyResource(resourceId, newName.toString(), imageUrl, equipmentArr);
                 if(res.success){
                     alert('Successfully editted resource!');
-                    redirect('/manage_resource')
+                    redirect('/dashboard')
                 } else {
                     if(res.duplicateError){
                         alert('Resource with such name exists!');
@@ -225,12 +227,12 @@ export function EditResourceDetails({resourceId, department}: ResourceDetailsPro
                                     label="" 
                                     type="text" 
                                     name={`resource_name_${index}`} 
-                                    className="text-md font-medium ml-[6.25%] w-[50%] border-2 rounded-full" 
+                                    className="text-md font-medium w-[50%] border-2 rounded-full" 
                                     placeholder="Enter Resource Name" 
                                     defaultValue={name}
                                     required
                                     />
-                                    <div className="absolute right-0 mr-[6.25%]">
+                                    <div className="absolute right-0">
                                         <EquipmentCounter count={count} onChange={(newCount) => handleCountChange(index, newCount)} />
                                     </div>
                                 </div>

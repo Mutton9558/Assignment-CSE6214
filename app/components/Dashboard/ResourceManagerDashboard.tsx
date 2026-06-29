@@ -13,13 +13,13 @@ import { useSession } from "next-auth/react";
 import SettingsPage from "../settings";
 import EditProfile from "../UserBoundary/EditProfile"
 
-interface ResourceManagerDashboardProp {
-    default_sect: string | null
-}
 
-export default function ResourceManager({ default_sect }: ResourceManagerDashboardProp) {
+
+export default function ResourceManager() {
     const router = useRouter();
     const {data:session, status} = useSession();
+
+
     const searchParams = useSearchParams();
     
     const tabParam = searchParams.get("tab"); 

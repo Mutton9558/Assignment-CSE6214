@@ -36,6 +36,7 @@ export default function BookingRequestCard({booking_id, booking_status, booking_
     }
 
     async function handleApprove(event: React.MouseEvent<HTMLButtonElement>){
+        event.stopPropagation();
         event.preventDefault();
         if(isPending){
             alert("Already performing an approval/rejection action!");
@@ -58,6 +59,7 @@ export default function BookingRequestCard({booking_id, booking_status, booking_
     }
 
     async function onSubmit(event: React.MouseEvent<HTMLButtonElement>){
+        event.stopPropagation();
         event.preventDefault();
         if(reason.trim() === ""){
             alert('Enter Reason!');
@@ -87,7 +89,7 @@ export default function BookingRequestCard({booking_id, booking_status, booking_
     if (isProcessed) return null;
 
     return(
-        <div onClick={() => router.push(`/booking_details/${booking_id}`)} id="card-container" className="w-full h-48 bg-secondary mt-4 mb-12 rounded-2xl p-4 overflow-hidden" {...props}>
+        <div onClick={() => router.push(`/booking_details/${booking_id}`)} id="card-container" className="cursor-pointer w-full h-48 bg-secondary mt-4 mb-12 rounded-2xl p-4 overflow-hidden" {...props}>
             <div id="card-header" className="flex flex-row justify-between w-full h-12">
                 <div id="user-info-section" className="flex flex-row justify-center items-center">
                     <div id="image-section" className="h-full">
@@ -137,7 +139,7 @@ export default function BookingRequestCard({booking_id, booking_status, booking_
                                 {isPending ? "Processing..." : "Approve"}
                             </button>
                             <button 
-                                onClick={handleRejectView} 
+                                onClick={(e) => {e.stopPropagation(); handleRejectView()}} 
                                 disabled={isPending}
                                 className="bg-red-400 w-32 h-8 rounded-2xl ml-1 cursor-pointer active:scale-95 active:bg-red-500 disabled:opacity-50 disabled:cursor-not-allowed"
                             >

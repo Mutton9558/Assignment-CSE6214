@@ -27,6 +27,12 @@ export default function DeleteResourceConfirmation(){
     const [buffering, setBuffering] = useState(false);
 
     async function deleteItem(){
+
+        if(buffering){
+            alert("Already processing confirmation!");
+            return;
+        }
+
         setBuffering(true);
         if(id !== null){
             const success = await deleteResource(id);
