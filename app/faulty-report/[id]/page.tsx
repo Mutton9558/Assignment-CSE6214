@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { MdArrowBack } from "react-icons/md";
+import { fetchResource } from "@/app/actions/ResourceController";
 
 interface FaultReport {
   resourceId: string;
