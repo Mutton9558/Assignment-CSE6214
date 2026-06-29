@@ -199,16 +199,16 @@ export function EditResourceDetails({resourceId, department}: ResourceDetailsPro
             <form className="w-full" onSubmit={handleSubmit}>
                 <div className="w-full flex flex-col relative p-8 justify-start">
                     <h1>Room Name:</h1>
-                    <input name="room-name" defaultValue={roomName} placeholder="Add resource name" className="w-11/12 h-8 bg-accent rounded-full p-2" required></input>
+                    <input name="room-name" defaultValue={roomName} placeholder="Add resource name" className="w-full h-8 bg-accent rounded-full p-2" required></input>
                 </div>
-                <div id="equipment-details-section" className="mb-16 w-full max-h-screen font-bold">
-                    <div className="relative flex flex-row items-center mb-8 ml-[6.25%]">
+                <div id="equipment-details-section" className="mb-16 p-8 w-full max-h-screen font-bold">
+                    <div className="relative flex flex-row items-center mb-8">
                         <h1>Equipment Included:</h1>
                         <button type="button" onClick={
                             () => setCounts((prev) => {
                                 return [...prev, ["", 1]];
                             })
-                        } className="absolute right-0 text-sm mr-[6.25%] bg-accent p-1.5 rounded-full w-32 cursor-pointer">+ Add Equipment</button>
+                        } className="absolute right-0 text-sm bg-accent p-1.5 rounded-full w-32 cursor-pointer">+ Add Equipment</button>
                     </div>
                     {
                         counts.length <= 0 ?

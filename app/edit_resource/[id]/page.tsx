@@ -3,7 +3,7 @@
 import { ResourceUI } from "@/app/components/ResourceUI";
 import { use } from "react";
 import { useSession } from "next-auth/react";
-import { useRouter } from "next/router";
+import { useRouter } from "next/navigation";
 
 interface ResourceDetailsPageProps{
     params: Promise<{id: string}>;

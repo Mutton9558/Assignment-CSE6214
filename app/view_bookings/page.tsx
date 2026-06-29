@@ -1,6 +1,6 @@
 "use client";
 
-import Button from "../components/Button"
+import BackButton from "../components/BackButton";
 import { BookingUI } from "../components/BookingUI";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
@@ -21,14 +21,7 @@ export default function ViewBookings(){
 
     return(
         <div className="p-4 h-full max-w-full mx-auto">
-            <header className="flex justify-between mb-6">
-                <div>
-                    <h1 className="text-2xl font-bold mb-4">Hi, {session?.user?.name || "user"}!</h1>
-                    <p>Manage Pending Bookings</p>
-                </div>
-                
-                <Button className="!w-10 !h-10 !p-2" buttonText="🔔" />
-            </header>
+            <BackButton buttonName="Back" buttonDesc={`List of Bookings`} />
             <BookingUI pageType="list" />
         </div>
     )

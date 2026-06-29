@@ -1,18 +1,17 @@
 import { FilterButtons } from "./FilterButtons";
 import { useState, useEffect } from "react";
-import BookingCard from "./BookingCard";
 import BookingRequestCard from "./BookingRequestCard";
 import { fetchAllBooking } from "../actions/BookingController";
 import { Booking } from "@/types";
-import Button from "./Button";
 import { useRouter } from "next/navigation";
 
 export function BookingRequestList(){
 
+    const router = useRouter();
+
     const [selectedDept, setSelectedDept] = useState("All");
     const [loading, setLoading] = useState(true);
     const [bookingList, setBookingList] = useState<Booking[] | null>(null);
-    const router = useRouter();
 
     useEffect(() => {
         async function getBookingList(){
@@ -31,18 +30,10 @@ export function BookingRequestList(){
     }, [])
 
     return(
-        <div className="max-w-full min-h-screen">
-            <header className="flex justify-between mb-6">
-                <div>
-                    <h1 className="text-2xl font-bold mb-4">Hi, John!</h1>
-                    <p>Manage Pending Bookings</p>
-                </div>
-                
-                <Button className="!w-10 !h-10 !p-2" buttonText="🔔" />
-            </header>
-            <div className="w-full flex flex-row justify-end">
+        <div>
+            <div className="w-full flex flex-row justify-end items-center mb-4">
                 <h1>View All Bookings?</h1>
-                <button onClick={() => router.push('/view_bookings')}>Click me</button>
+                <button className="cursor-pointer ml-4 p-1 pl-2 pr-2 bg-secondary rounded-full" onClick={() => router.push('/view_bookings')}>Click me</button>
             </div>
             <FilterButtons onClickHandler={setSelectedDept}/>
             {

@@ -19,7 +19,7 @@ export class BookingUI extends React.Component<BookingUIProps>{
 
     public static displayRequests(){
         return (
-            <div className="p-4 h-full max-w-full mx-auto">
+            <div className="max-w-full min-h-screen">
                 <BookingRequestList />
             </div>
         );

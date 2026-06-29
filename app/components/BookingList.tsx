@@ -30,7 +30,7 @@ export default function BookingList(){
 
                         if (booking.booking_status === "Check-in") {
                             newStatus = "Ended";
-                        } else if (booking.booking_status !== "Ended" && booking.booking_status !== "Cancelled") {
+                        } else if (booking.booking_status !== "Ended" && booking.booking_status !== "Cancelled" && booking.booking_status !== "Rejected") {
                             // If it's past its time and wasn't checked-in, ended, or already cancelled, it becomes Cancelled
                             newStatus = "Cancelled";
                         }
@@ -64,7 +64,7 @@ export default function BookingList(){
     return(
         <div className="max-w-full min-h-screen">
             <FilterButtons onClickHandler={setSelectedDept} />
-            <h1>Pending Bookings:</h1>
+            <h1 className="mt-4">Pending Bookings:</h1>
             {
                 
                 pendingBookings.map((booking, index) => {
@@ -81,6 +81,7 @@ export default function BookingList(){
                             resourceDepartment={booking.resource.resource_dept} 
                             resourceName={booking.resource.resource_name} 
                             userEmail={booking.booking_owner.email}
+                            hidden={selectedDept !== "All" && selectedDept !== booking.resource.resource_dept}
                         />
                     )
                 })
@@ -103,6 +104,7 @@ export default function BookingList(){
                             resourceDepartment={booking.resource.resource_dept} 
                             resourceName={booking.resource.resource_name} 
                             userEmail={booking.booking_owner.email}
+                            hidden={selectedDept !== "All" && selectedDept !== booking.resource.resource_dept}
                         />
                     )
                 })
@@ -125,6 +127,7 @@ export default function BookingList(){
                             resourceDepartment={booking.resource.resource_dept} 
                             resourceName={booking.resource.resource_name} 
                             userEmail={booking.booking_owner.email}
+                            hidden={selectedDept !== "All" && selectedDept !== booking.resource.resource_dept}
                         />
                     )
                 })
@@ -147,6 +150,7 @@ export default function BookingList(){
                             resourceDepartment={booking.resource.resource_dept} 
                             resourceName={booking.resource.resource_name} 
                             userEmail={booking.booking_owner.email}
+                            hidden={selectedDept !== "All" && selectedDept !== booking.resource.resource_dept}
                         />
                     )
                 })
@@ -169,6 +173,7 @@ export default function BookingList(){
                             resourceDepartment={booking.resource.resource_dept} 
                             resourceName={booking.resource.resource_name} 
                             userEmail={booking.booking_owner.email}
+                            hidden={selectedDept !== "All" && selectedDept !== booking.resource.resource_dept}
                         />
                     )
                 })

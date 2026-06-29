@@ -3,7 +3,7 @@ import Button from "./Button";
 import { DEPARTMENTS } from "../constants";
 import { useRef, useState } from "react";
 import { approveBooking, rejectBooking } from "../actions/BookingController";
-import { useRouter } from "next/router";
+import { useRouter } from "next/navigation";
 
 interface BookingRequestCardProp extends React.HTMLAttributes<HTMLDivElement>{
     booking_id: string;
@@ -87,7 +87,7 @@ export default function BookingRequestCard({booking_id, booking_status, booking_
     if (isProcessed) return null;
 
     return(
-        <div onClick={() => router.push(`/booking_details/${booking_id}`)} id="card-container" className="w-full h-48 bg-secondary mt-16 rounded-2xl p-4 overflow-hidden" {...props}>
+        <div onClick={() => router.push(`/booking_details/${booking_id}`)} id="card-container" className="w-full h-48 bg-secondary mt-4 mb-12 rounded-2xl p-4 overflow-hidden" {...props}>
             <div id="card-header" className="flex flex-row justify-between w-full h-12">
                 <div id="user-info-section" className="flex flex-row justify-center items-center">
                     <div id="image-section" className="h-full">
