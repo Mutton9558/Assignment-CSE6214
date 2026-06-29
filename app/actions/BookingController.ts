@@ -330,6 +330,17 @@ export async function modifyBookingStatus(id: string, status: string){
         await bookingRef.update({
             booking_status: status
         })
+
+        if(status === "Cancelled" || status === "Ended"){
+            const bookingSnap = await bookingRef.get();
+            const bookingData = bookingSnap.data()
+            if(bookingData){
+                const resourceRef = bookingData.resource;
+                await resourceRef({
+                    status: "Available"
+                })
+            }
+        }
         return {success: true};
     } catch (error){
         return {error: error}
