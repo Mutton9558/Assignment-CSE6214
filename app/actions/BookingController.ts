@@ -233,6 +233,11 @@ export async function approveBooking(bookingId: string, email: string, name: str
             booking_status: "Booked"
         })
 
+        const resourceRef = await adminDb.collection('Resources').doc(resource_id);
+        await resourceRef.update({
+            resource_status: "Booked"
+        })
+
         const startTimestamp = Timestamp.fromDate(start);
         const endTimestamp = Timestamp.fromDate(end);
 
