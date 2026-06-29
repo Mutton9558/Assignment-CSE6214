@@ -112,14 +112,8 @@ const DetailLoader: React.FC<DetailLoaderProps> = ({ requestId }) => {
 export class MaintenanceUI extends React.Component<MaintenanceUIProps> {
     public static displayList() {
         return (
-            <div className="p-4 h-full max-w-screen mx-auto">
-                <header className="flex justify-between mb-6">
-                    <div>
-                        <h1 className="text-2xl font-bold mb-4">Hi, John!</h1>
-                        <p>Maintenance Request List</p>
-                    </div>
-                    <Button className="!w-10 !h-10 !p-2" buttonText="🔔" />
-                </header>
+            <div>
+                
                 <MaintenanceRequestList />
             </div>
         );
