@@ -6,8 +6,8 @@ import { useState, useEffect } from "react";
 import { generateBookingAnalytics } from "../actions/AnalyticsController";
 import { AnalyticsData } from "@/types";
 
-const DashboardComponent: React.FC = () => {
 
+const DashboardComponent: React.FC = () => {
     const [analyticsData, setAnalyticsData] = useState<AnalyticsData>();
 
     useEffect(() => {
@@ -22,16 +22,8 @@ const DashboardComponent: React.FC = () => {
     }, [])
 
     return(
-        <div className="max-w-full min-h-screen">
-            <header className="flex justify-between mb-6">
-                <div>
-                    <h1 className="text-2xl font-bold mb-4">Hi, John!</h1>
-                    <p>Analytics (18th - 24th May 2026)</p>
-                </div>
-                
-                <Button className="!w-10 !h-10 !p-2" buttonText="🔔" />
-            </header>
-            <div id="content-section" className="mt-4 w-full">
+        <div>
+            <div id="content-section" className="w-96">
                 <div id="booking-section-header" className="flex flex-row justify-between items-center">
                     <h1 className="font-semibold text-sm">Total number of Bookings</h1>
                     <h1 className="font-semibold text-sm flex flex-row justify-center items-center">{analyticsData?.bookingCount} total</h1>

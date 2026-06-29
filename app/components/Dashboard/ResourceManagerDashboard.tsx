@@ -3,12 +3,13 @@ import { useState, useEffect } from "react";
 import NavBar, { NavItem } from "../NavBar";
 import { LuCalendarPlus, LuBookPlus } from "react-icons/lu";
 import { MdOutlineMonitorHeart, MdOutlineReportGmailerrorred } from "react-icons/md";
+import { BookingUI } from "../BookingUI";
 import { useRouter, useSearchParams } from "next/navigation";
-import { BookingListUI } from "../BookingListUI";
 import { ResourceUI } from "../ResourceUI";
 import { AnalyticsUI } from "../AnalyticsUI";
 import { MaintenanceUI } from "../MaintenanceUI";
 import Button from "../Button";
+import { useSession } from "next-auth/react";
 
 interface ResourceManagerDashboardProp {
     default_sect: string | null
@@ -16,6 +17,7 @@ interface ResourceManagerDashboardProp {
 
 export default function ResourceManager({ default_sect }: ResourceManagerDashboardProp) {
     const router = useRouter();
+    const {data:session, status} = useSession();
     const searchParams = useSearchParams();
     
     const tabParam = searchParams.get("tab"); 
@@ -44,18 +46,69 @@ export default function ResourceManager({ default_sect }: ResourceManagerDashboa
         switch (activeSection) {
             case "manage-booking":
                 return (
-                    <BookingListUI pageType="list" />
+                    <div className="p-4 h-full max-w-full mx-auto " >
+                        <header className="flex justify-between mb-6">
+                            <div>
+                                <h1 className="text-2xl font-bold mb-4">Hi, {session?.user.name || "user"}!</h1>
+                                <p>Manage Pending Bookings</p>
+                            </div>
+                            
+                            <Button className="!w-10 !h-10 !p-2" buttonText="🔔" />
+                        </header>
+                        <BookingUI pageType="request_list" />
+                    </div>
                 );
             case "manage-resources":
-                return <ResourceUI pageType="list" />;
+                return (
+                    <div className="max-w-full flex flex-col p-4 overflow-x-hidden">
+                        <header className="flex justify-between mb-6">
+                            <div>
+                                <h1 className="text-2xl font-bold mb-4">Hi, {session?.user.name || "user"}!</h1>
+                                <p>Resource List</p>
+                            </div>
+                            
+                            <Button className="!w-10 !h-10 !p-2" buttonText="🔔" />
+                        </header>
+                        <ResourceUI pageType="list" />
+                    </div>
+                    
+                );
             case "analytics":
-                return <AnalyticsUI />;
+                return (
+                    <div className="w-max-w-full flex flex-col p-4 overflow-x-hidden">
+                        <header className="flex justify-between mb-6">
+                            <div>
+                                <h1 className="text-2xl font-bold mb-4">Hi, {session?.user.name || "user"}!</h1>
+                                <p>Analytics (18th - 24th May 2026)</p>
+                            </div>
+                            
+                            <Button className="!w-10 !h-10 !p-2" buttonText="🔔" />
+                        </header>
+                        <AnalyticsUI />
+                    </div>
+                    
+                );
             case "reports":
-                return <MaintenanceUI pageType="list" />;
+                return (
+                    <div className="p-4 h-full max-w-full mx-auto">
+                        <header className="flex justify-between mb-6">
+                            <div>
+                                <h1 className="text-2xl font-bold mb-4">Hi, {session?.user.name || "user"}!</h1>
+                                <p>Maintenance Request List</p>
+                            </div>
+                            <Button className="!w-10 !h-10 !p-2" buttonText="🔔" />
+                        </header>
+                        <MaintenanceUI pageType="list" />;
+                    </div>
+                )
             default:
                 return <div>Section not found</div>;
         }
     };
+
+    if(status === "loading"){
+        return(<p>Loading</p>)
+    }
 
     return (
     <div className="h-full bg-gray-50 flex flex-col overflow-hidden">

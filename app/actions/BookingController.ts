@@ -7,6 +7,7 @@ import { cleanFirestoreData } from "@/lib/utils";
 import { transporter } from "@/lib/EmailInitializer";
 import { auth } from "@/auth";
 import { createNotification } from "./NotificationController";
+import { collection, query, where } from "firebase/firestore";
 
 export async function getUserBookings(): Promise<Booking[]> {
     try {
@@ -182,50 +183,6 @@ export async function fetchAllBooking(){
     }
 }
 
-export async function approveBooking(bookingId: string, email: string, name: string, resource: string){
-    try{
-        const bookingRef = await adminDb.collection('Bookings').doc(bookingId);
-        await bookingRef.update({
-            booking_status: "Booked"
-        })
-
-        // send email
-        const mailOptions = {
-            from: `Campus Resource Booking System <${process.env.SMTP_FROM_EMAIL}>`,
-            to: email,
-            subject: 'Booking Request Approval Notification',
-            text: `Hello ${name},
-
-            We are pleased to your booking request for ${resource} has been approved! Please do not forget to check in
-            at least 24 hours before your booking starts to avoid it from being cancelled.
-
-            If you wish to contact us, feel free to reply to this email and a staff member will get back to you soon.`,
-            html: `
-            <div style="font-family: sans-serif; text-align: center;">
-                <h1>Hello ${name},</h1>
-                <p>]
-                    We are pleased to your booking request for <b>${resource}</b> has been approved! Please do not forget to check in
-                    at least 24 hours before your booking starts to avoid it from being cancelled.
-                </p>
-                
-                <p>If you wish to contact us, feel free to reply to this email and a staff will get to you soon.</p>
-                <br>
-                <img src="https://tqhyjalqieggxdxrmetq.supabase.co/storage/v1/object/public/profile_pictures/absolutecinema.png" alt="crbs-pic" width="150"></img>
-            </div>
-            `,
-        };
-
-        await transporter.sendMail(mailOptions);
-
-        await createNotification(bookingId, "Booking Approved", `Your booking request for ${resource} has been approved.`);
-
-        return {success: true}
-    } catch (error){
-        console.log(error);
-        return {error: error}
-    }
-}
-
 export async function rejectBooking(bookingId: string, email: string, reason: string, name: string, resource: string){
     try{
         const bookingRef = await adminDb.collection('Bookings').doc(bookingId);
@@ -261,6 +218,95 @@ export async function rejectBooking(bookingId: string, email: string, reason: st
         await transporter.sendMail(mailOptions);
 
         await createNotification(bookingId, "Booking Rejected", `Your booking request for ${resource} has been rejected. Reason: ${reason}`);
+
+        return {success: true}
+    } catch (error){
+        console.log(error);
+        return {error: error}
+    }
+}
+
+export async function approveBooking(bookingId: string, email: string, name: string, resource_id: string, resource: string, start: Date, end: Date){
+    try{
+        const bookingRef = await adminDb.collection('Bookings').doc(bookingId);
+        await bookingRef.update({
+            booking_status: "Booked"
+        })
+
+        const resourceRef = await adminDb.collection('Resources').doc(resource_id);
+        await resourceRef.update({
+            resource_status: "Booked"
+        })
+
+        const startTimestamp = Timestamp.fromDate(start);
+        const endTimestamp = Timestamp.fromDate(end);
+
+        const conflictingRefs = await adminDb.collection('Bookings')
+        .where('resource', '==', `/Resources/${resource_id}`)
+        .where('booking_end', '>', startTimestamp)
+        .where('booking_start', '<', endTimestamp)
+        .get();
+
+        if (!conflictingRefs.empty) {
+            const rejectionPromises = conflictingRefs.docs.map(async (doc) => {
+                const bookingData = doc.data();
+                const bookingId = doc.id;
+
+                const userRef = typeof bookingData.booking_owner === 'string' 
+                    ? adminDb.doc(bookingData.booking_owner) 
+                    : bookingData.booking_owner;
+                
+                const userSnap = await userRef.get();
+                const userData = userSnap.data() || {};
+
+                const resourceRef = typeof bookingData.resource === 'string' 
+                    ? adminDb.doc(bookingData.resource) 
+                    : bookingData.resource;
+                    
+                const resourceSnap = await resourceRef.get();
+                const resourceData = resourceSnap.data() || {};
+
+                const email = userData.email || 'no-email@domain.com';
+                const name = userData.name || 'User';
+                const resourceName = resourceData.resource_name || 'Requested Resource'; 
+                const reason = "Time slot conflict with an approved booking.";
+
+                return rejectBooking(bookingId, email, reason, name, resourceName);
+            });
+
+            const results = await Promise.all(rejectionPromises);
+            console.log(`Processed ${results.length} rejections.`);
+        }
+
+        // send email
+        const mailOptions = {
+            from: `Campus Resource Booking System <${process.env.SMTP_FROM_EMAIL}>`,
+            to: email,
+            subject: 'Booking Request Approval Notification',
+            text: `Hello ${name},
+
+            We are pleased to your booking request for ${resource} has been approved! Please do not forget to check in
+            at least 24 hours before your booking starts to avoid it from being cancelled.
+
+            If you wish to contact us, feel free to reply to this email and a staff member will get back to you soon.`,
+            html: `
+            <div style="font-family: sans-serif; text-align: center;">
+                <h1>Hello ${name},</h1>
+                <p>]
+                    We are pleased to your booking request for <b>${resource}</b> has been approved! Please do not forget to check in
+                    at least 24 hours before your booking starts to avoid it from being cancelled.
+                </p>
+                
+                <p>If you wish to contact us, feel free to reply to this email and a staff will get to you soon.</p>
+                <br>
+                <img src="https://tqhyjalqieggxdxrmetq.supabase.co/storage/v1/object/public/profile_pictures/absolutecinema.png" alt="crbs-pic" width="150"></img>
+            </div>
+            `,
+        };
+
+        await transporter.sendMail(mailOptions);
+
+        await createNotification(bookingId, "Booking Approved", `Your booking request for ${resource} has been approved.`);
 
         return {success: true}
     } catch (error){
@@ -383,4 +429,14 @@ export async function editBooking(data: EditBookingData) {
     console.error("Error submitting edited booking:", error);
     return { error: "Failed to submit changes. Please try again." };
   }
+export async function modifyBookingStatus(id: string, status: string){
+    try{
+        const bookingRef = await adminDb.collection("Bookings").doc(id);
+        await bookingRef.update({
+            booking_status: status
+        })
+        return {success: true};
+    } catch (error){
+        return {error: error}
+    }
 }
