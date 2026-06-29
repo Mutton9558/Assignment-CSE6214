@@ -2,8 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { User } from "@/types";
-import { fetchUser, modifyUser } from "@/app/actions/adminActions";
-import { resetPassword } from "@/app/actions/UserController";
+import { fetchUser, modifyUser, resetPassword } from "@/app/actions/UserController";
 import { MdOutlinePerson, MdOutlineMail, MdOutlinePhone, MdPassword } from "react-icons/md";
 import Input from "../input";
 import Toggle from "../toggleComponents";

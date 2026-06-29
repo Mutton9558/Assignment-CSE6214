@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useUser } from "@/app/components/UserBoundary/UserContext";
-import { fetchFeedbacks } from "@/app/actions/adminActions";
+import { fetchFeedbacks } from "@/app/actions/FeedbackController";
 import { MdOutlinePerson } from "react-icons/md";
 import Button from "../Button";
 

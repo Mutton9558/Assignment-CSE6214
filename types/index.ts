@@ -51,8 +51,26 @@ export interface MaintenanceRequest{
 
 export interface Notification {
     notification_id: string;
+    type: "report" | "booking" | "general";
+    title: string;
     message: string;
     timestamp: Date;
     isRead: boolean;
     targetUser: string;
+}
+
+export interface AnalyticsData {
+    bookingCount: number,
+    bookingTopResources: {
+        resourceId: string;
+        name: string;
+        count: number;
+    }[],
+    peakBookingHours: number,
+    reportCount: number,
+    reportTopResources: {
+        resourceId: string;
+        name: string;
+        count: number;
+    }[]
 }

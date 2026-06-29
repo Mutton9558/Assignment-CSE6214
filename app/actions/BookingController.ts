@@ -1,64 +1,103 @@
 "use server";
 
 import { adminDb } from "@/lib/DatabaseInitializer";
-import { Booking, Resource, User } from "@/types";
+import { Booking, Resource, User, Notification } from "@/types";
 import { Timestamp, DocumentReference } from "firebase-admin/firestore";
 import { cleanFirestoreData } from "@/lib/utils";
 import { transporter } from "@/lib/EmailInitializer";
+import { auth } from "@/auth";
+import { createNotification } from "./NotificationController";
+import { collection, query, where } from "firebase/firestore";
 
-export async function getStudentBookings(userId: string): Promise<Booking[]> {
+export async function getUserBookings(): Promise<Booking[]> {
     try {
-        console.log(`[BookingController] Fetching bookings for user: ${userId}`);
+        const session = await auth();
+        const userId = String((session?.user as any)?.user_id || session?.user?.id);
+
+        if (!userId) {
+            console.error("[BookingController] Not authenticated");
+            return [];
+        }
+
+        console.log(`[BookingController] Fetching bookings matching reference: Users/${userId}`);
         const userRef = adminDb.collection('Users').doc(userId);
         const snapshot = await adminDb.collection('Bookings')
             .where('booking_owner', '==', userRef)
             .get();
 
         if (snapshot.empty) {
-            console.log(`[BookingController] No bookings found for user: ${userId}`);
             return [];
         }
 
-        const bookingList:Booking[] = [];
+        const bookingList: any[] = [];
         for (const doc of snapshot.docs) {
             const data = doc.data();
             if (data) {
-                const ownerSnap = await (data.booking_owner as DocumentReference).get();
-                const ownerData = ownerSnap.data();
-
-                const resourceRef = data.resource as DocumentReference;
-                const resourceSnap = await resourceRef.get();
-                const resourceData = resourceSnap.data();
-
-                if (ownerData && resourceData) {
+                try {
+                    // 1. Resolve Owner safely
+                    const ownerSnap = await (data.booking_owner as DocumentReference).get();
+                    const ownerData = ownerSnap.data() || {};
                     const owner: User = {
                         user_id: ownerSnap.id,
                         ...cleanFirestoreData(ownerData),
                     } as User;
 
-                    const resource: Resource = {
-                        resource_id: resourceSnap.id,
-                        resource_name: resourceData.resource_name,
-                        resource_dept: resourceData.resource_dept,
-                        resource_img_url: resourceData.resource_img_url,
-                        resource_status: resourceData.status,
-                        resource_equipments: resourceData.resource_equipments
+                    // 2. Resolve Resource safely (with fallback!)
+                    let resource: Resource = {
+                        resource_id: "unknown",
+                        resource_name: "Unknown Resource (Data Error)",
+                        resource_dept: "N/A",
+                        resource_status: "Available"
                     };
+
+                    // Check if it's actually a reference before trying to get it
+                    if (data.resource && typeof data.resource.get === 'function') {
+                        const resourceSnap = await (data.resource as DocumentReference).get();
+                        const resourceData = resourceSnap.data();
+                        
+                        if (resourceData) {
+                            resource = {
+                                resource_id: resourceSnap.id,
+                                resource_name: resourceData.resource_name || "Unnamed",
+                                resource_dept: resourceData.resource_dept || "N/A",
+                                resource_img_url: resourceData.resource_img_url,
+                                resource_status: resourceData.status || "Available",
+                                resource_equipments: resourceData.resource_equipments
+                            };
+                        }
+                    } else if (typeof data.resource === 'object' && data.resource.resource_name) {
+                        // Scenario B: It was saved as a Map/Object (Old Test Bookings)
+                        resource = {
+                            resource_id: data.resource.resource_id || "unknown",
+                            resource_name: data.resource.resource_name,
+                            resource_dept: data.resource.resource_dept || "N/A",
+                            resource_img_url: data.resource.resource_img_url,
+                            resource_status: data.resource.resource_status || "Available",
+                            resource_equipments: data.resource.resource_equipments
+                        };
+                    } else {
+                        console.warn(`[BookingController] Warning: Booking ${doc.id} is missing resource field.`);
+                    }
 
                     bookingList.push({
                         booking_id: doc.id,
                         booking_owner: owner,
                         resource: resource,
-                        booking_start: (data.booking_start as Timestamp).toDate(),
-                        booking_end: (data.booking_end as Timestamp).toDate(),
-                        booking_status: data.booking_status,
-                        booking_reason: data.booking_reason,
-                        request_created_at: (data.request_created_at as Timestamp).toDate(),
-                        prev_booking: data.prev_booking
+                        // Safely handle both Firestore Timestamps and strings
+                        booking_start: data.booking_start?.toDate ? data.booking_start.toDate().toISOString() : data.booking_start,
+                        booking_end: data.booking_end?.toDate ? data.booking_end.toDate().toISOString() : data.booking_end,
+                        booking_status: data.booking_status || "Unknown",
+                        booking_reason: data.booking_reason || "",
+                        request_created_at: data.request_created_at?.toDate ? data.request_created_at.toDate().toISOString() : data.request_created_at,
+                        prev_booking: data.prev_booking || null
                     });
+                    
+                } catch (err) {
+                    console.error(`[BookingController] Error processing booking doc ${doc.id}:`, err);
                 }
             }
         }
+        
         console.log(`[BookingController] Found ${bookingList.length} bookings for user: ${userId}`);
         return bookingList;
     } catch (error) {
@@ -73,9 +112,19 @@ export async function createBooking(bookingData: Booking) {
             throw new Error("Booking end time must be after start time");
         }
 
-        await adminDb.collection("bookings").add({
+        await adminDb.collection("Bookings").add({
             ...bookingData,
         });
+
+        const resourceManagersQuery = await adminDb.collection("Users")
+            .where("role", "==", "Resource Manager")
+            .get();
+
+        const notificationPromises = resourceManagersQuery.docs.map(async (doc) => {
+            createNotification(doc.id, "New Booking Request", `A new booking request has been made for ${bookingData.resource.resource_name}.`);
+        });
+
+        await Promise.all(notificationPromises);
         return { success: true, message: "Booking created successfully" };
     } catch (error) {
         console.error("Error creating booking:", error);
@@ -117,8 +166,8 @@ export async function fetchAllBooking(){
                 bookingList.push({
                     booking_id: doc.id,
                     booking_owner: owner,
-                    booking_start: data.booking_start.toDate(),
-                    booking_end: data.booking_end.toDate(),
+                    booking_start: data.booking_start.toDate().toISOString(),
+                    booking_end: data.booking_end.toDate().toISOString(),
                     booking_status: data.booking_status,
                     booking_reason: data.booking_reason,
                     resource: resource,
@@ -131,48 +180,6 @@ export async function fetchAllBooking(){
     } catch (error){
         console.log(error);
         return [];
-    }
-}
-
-export async function approveBooking(bookingId: string, email: string, name: string, resource: string){
-    try{
-        const bookingRef = await adminDb.collection('Bookings').doc(bookingId);
-        await bookingRef.update({
-            booking_status: "Booked"
-        })
-
-        // send email
-        const mailOptions = {
-            from: `Campus Resource Booking System <${process.env.SMTP_FROM_EMAIL}>`,
-            to: email,
-            subject: 'Booking Request Approval Notification',
-            text: `Hello ${name},
-
-            We are pleased to your booking request for ${resource} has been approved! Please do not forget to check in
-            at least 24 hours before your booking starts to avoid it from being cancelled.
-
-            If you wish to contact us, feel free to reply to this email and a staff member will get back to you soon.`,
-            html: `
-            <div style="font-family: sans-serif; text-align: center;">
-                <h1>Hello ${name},</h1>
-                <p>]
-                    We are pleased to your booking request for <b>${resource}</b> has been approved! Please do not forget to check in
-                    at least 24 hours before your booking starts to avoid it from being cancelled.
-                </p>
-                
-                <p>If you wish to contact us, feel free to reply to this email and a staff will get to you soon.</p>
-                <br>
-                <img src="https://tqhyjalqieggxdxrmetq.supabase.co/storage/v1/object/public/profile_pictures/absolutecinema.png" alt="crbs-pic" width="150"></img>
-            </div>
-            `,
-        };
-
-        await transporter.sendMail(mailOptions);
-
-        return {success: true}
-    } catch (error){
-        console.log(error);
-        return {error: error}
     }
 }
 
@@ -210,9 +217,121 @@ export async function rejectBooking(bookingId: string, email: string, reason: st
 
         await transporter.sendMail(mailOptions);
 
+        await createNotification(bookingId, "Booking Rejected", `Your booking request for ${resource} has been rejected. Reason: ${reason}`);
+
         return {success: true}
     } catch (error){
         console.log(error);
+        return {error: error}
+    }
+}
+
+export async function approveBooking(bookingId: string, email: string, name: string, resource_id: string, resource: string, start: Date, end: Date){
+    try{
+        const bookingRef = await adminDb.collection('Bookings').doc(bookingId);
+        await bookingRef.update({
+            booking_status: "Booked"
+        })
+
+        const resourceRef = await adminDb.collection('Resources').doc(resource_id);
+        await resourceRef.update({
+            resource_status: "Booked"
+        })
+
+        const startTimestamp = Timestamp.fromDate(start);
+        const endTimestamp = Timestamp.fromDate(end);
+
+        const conflictingRefs = await adminDb.collection('Bookings')
+        .where('resource', '==', `/Resources/${resource_id}`)
+        .where('booking_end', '>', startTimestamp)
+        .where('booking_start', '<', endTimestamp)
+        .get();
+
+        if (!conflictingRefs.empty) {
+            const rejectionPromises = conflictingRefs.docs.map(async (doc) => {
+                const bookingData = doc.data();
+                const bookingId = doc.id;
+
+                const userRef = typeof bookingData.booking_owner === 'string' 
+                    ? adminDb.doc(bookingData.booking_owner) 
+                    : bookingData.booking_owner;
+                
+                const userSnap = await userRef.get();
+                const userData = userSnap.data() || {};
+
+                const resourceRef = typeof bookingData.resource === 'string' 
+                    ? adminDb.doc(bookingData.resource) 
+                    : bookingData.resource;
+                    
+                const resourceSnap = await resourceRef.get();
+                const resourceData = resourceSnap.data() || {};
+
+                const email = userData.email || 'no-email@domain.com';
+                const name = userData.name || 'User';
+                const resourceName = resourceData.resource_name || 'Requested Resource'; 
+                const reason = "Time slot conflict with an approved booking.";
+
+                return rejectBooking(bookingId, email, reason, name, resourceName);
+            });
+
+            const results = await Promise.all(rejectionPromises);
+            console.log(`Processed ${results.length} rejections.`);
+        }
+
+        // send email
+        const mailOptions = {
+            from: `Campus Resource Booking System <${process.env.SMTP_FROM_EMAIL}>`,
+            to: email,
+            subject: 'Booking Request Approval Notification',
+            text: `Hello ${name},
+
+            We are pleased to your booking request for ${resource} has been approved! Please do not forget to check in
+            at least 24 hours before your booking starts to avoid it from being cancelled.
+
+            If you wish to contact us, feel free to reply to this email and a staff member will get back to you soon.`,
+            html: `
+            <div style="font-family: sans-serif; text-align: center;">
+                <h1>Hello ${name},</h1>
+                <p>]
+                    We are pleased to your booking request for <b>${resource}</b> has been approved! Please do not forget to check in
+                    at least 24 hours before your booking starts to avoid it from being cancelled.
+                </p>
+                
+                <p>If you wish to contact us, feel free to reply to this email and a staff will get to you soon.</p>
+                <br>
+                <img src="https://tqhyjalqieggxdxrmetq.supabase.co/storage/v1/object/public/profile_pictures/absolutecinema.png" alt="crbs-pic" width="150"></img>
+            </div>
+            `,
+        };
+
+        await transporter.sendMail(mailOptions);
+
+        await createNotification(bookingId, "Booking Approved", `Your booking request for ${resource} has been approved.`);
+
+        return {success: true}
+    } catch (error){
+        console.log(error);
+        return {error: error}
+    }
+}
+
+export async function getBookingWithinDuration(start: Timestamp, end: Timestamp){
+    try{
+        const bookingRef = await adminDb.collection('Bookings').where('booking_start', '>=', start).where('booking_start', '<=', end).get();
+        return bookingRef;
+    } catch (error){
+        return {error: error}
+    }
+}
+
+export async function modifyBookingStatus(id: string, status: string){
+    try{
+        const bookingRef = await adminDb.collection("Bookings").doc(id);
+        await bookingRef.update({
+            booking_status: status
+        })
+        return {success: true};
+    } catch (error){
         return {error: error}
     }
 }

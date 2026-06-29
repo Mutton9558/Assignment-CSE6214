@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { registerStaff } from "@/app/actions/adminActions";
+import { registerStaff } from "@/app/actions/UserController";
 import Input from "../input";
 import Button from "../Button";
 

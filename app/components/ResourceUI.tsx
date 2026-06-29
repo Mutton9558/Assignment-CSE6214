@@ -2,7 +2,6 @@ import { ResourceSelectDepartment } from "./ResourceSelectDepartment";
 import React from "react";
 import { ResourceDetails } from "./ResourceDetails";
 import { EditResourceDetails } from "./EditResourceDetails";
-import Button from "./Button";
 import { DEPARTMENTS } from "../constants";
 
 interface ResourceUIProps{
@@ -12,17 +11,10 @@ interface ResourceUIProps{
 }
 
 export class ResourceUI extends React.Component<ResourceUIProps>{
+    
     public static displayList(){
         return(
-            <div className="max-w-screen flex flex-col p-4 overflow-x-hidden">
-                <header className="flex justify-between mb-6">
-                    <div>
-                        <h1 className="text-2xl font-bold mb-4">Hi, John!</h1>
-                        <p>Resource List</p>
-                    </div>
-                    
-                    <Button className="!w-10 !h-10 !p-2" buttonText="🔔" />
-                </header>
+            <div>
                 {
                     [...DEPARTMENTS.entries()].map(([key, val]) => (
                         <ResourceSelectDepartment key={key} department={key} />

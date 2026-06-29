@@ -1,17 +1,12 @@
 "use client";
 
-import { ResourceUI } from "@/app/components/ResourceUI";
-import { use } from "react";
-import { useSession } from "next-auth/react";
+import BackButton from "../components/BackButton";
+import { BookingUI } from "../components/BookingUI";
 import { useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
 
-interface ResourceDetailsPageProps{
-    params: Promise<{id: string}>;
-}
-
-export default function ResourceDetailsPage({params}: ResourceDetailsPageProps){
+export default function ViewBookings(){
     const router = useRouter();
-    const { id } = use(params);
     const { data: session, status } = useSession();
     const userRole = session?.user?.role?.toLowerCase() || null;
     const isResourceManager = userRole === "resource manager";
@@ -25,6 +20,9 @@ export default function ResourceDetailsPage({params}: ResourceDetailsPageProps){
     }
 
     return(
-        <ResourceUI pageType="edit" resourceId={id}/>
+        <div className="p-4 h-full max-w-full mx-auto">
+            <BackButton buttonName="Back" buttonDesc={`List of Bookings`} />
+            <BookingUI pageType="list" />
+        </div>
     )
 }

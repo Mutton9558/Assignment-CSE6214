@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { User } from "@/types";
-import { fetchUser, deleteUser } from "@/app/actions/adminActions";
+import { fetchUser, deleteUser } from "@/app/actions/UserController";
 import { MdOutlinePerson, MdOutlineMail, MdOutlinePhone, MdPassword } from "react-icons/md";
 import { FiEye, FiEyeOff } from "react-icons/fi";
 import Button from "../Button";
@@ -82,8 +82,8 @@ export default function UserDetails({ userId, setActiveSection }: Props) {
                 <div className="bg-secondary/20 z-50 backdrop-blur-md rounded-2xl px-4 py-4 flex flex-col gap-4 shadow-md">
                     <div className="flex items-center gap-3">
                         <MdPassword className="text-4xl text-white bg-foreground p-1 rounded-xl w-10" />
-                        <div className="flex-1">
-                            <p className="text-sm">{showPassword ? (user.password || "N/A") : "•".repeat(14)}</p>
+                        <div className="flex-1 min-w-0">
+                            <p className="text-sm break-all">{showPassword ? (user.password || "N/A") : "•".repeat(14)}</p>
                             <p className="text-xs text-gray-500">Password</p>
                         </div>
                         <button onClick={() => setShowPassword(!showPassword)} className="cursor-pointer">
