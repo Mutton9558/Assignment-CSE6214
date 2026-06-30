@@ -113,9 +113,9 @@ export default function preBooking({ setActiveSection, setBookingData }: PreBook
                 <Input name="email" label="Student Email" type="text" placeholder="Student Email" value={Email} disabled />
                 <Input 
                     name="start-booking" 
-                    label="Booking Date" 
+                    label="Start Booking Date" 
                     type="datetime-local" 
-                    placeholder="Booking Date" 
+                    placeholder="Start Booking Date" 
                     value={bookingStart} 
                     onChange={handleBookingStartChange} 
                     min={minDateTime}
