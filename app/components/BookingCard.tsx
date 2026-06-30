@@ -14,6 +14,7 @@ export default function BookingCard({ booking, roomImage }: BookingCardProps) {
     const startDate = new Date(booking.booking_start);
 
     const fifteenMinutesBeforeStart = new Date(startDate.getTime() - (15 * 6000));
+    const canEditBooking = now < startDate && booking.booking_status === "Booked";
     const canCheckIn = now >= fifteenMinutesBeforeStart && now < startDate && booking.booking_status === "Booked";
     const canReportFault = booking.booking_status === "Check-in";
 
@@ -34,6 +35,9 @@ export default function BookingCard({ booking, roomImage }: BookingCardProps) {
                     <p className="text-sm text-gray-600">Status: {booking.booking_status}</p>
                     <div className="flex flex-row justify-end mt-2">
                         <Button className="!w-fit !rounded-3xl rounded-md !hover:bg-blue-600 !transition-colors" buttonText="View Details" onClick={() => {router.push(`/booking_details/${booking.booking_id}?source=bookings`)}}/>
+                        {canEditBooking && (
+                            <Button className="!w-fit !rounded-3xl rounded-md !hover:bg-yellow-600 !transition-colors ml-2" buttonText="Edit Booking" onClick={() => {router.push(`/edit-bookings/${booking.booking_id}?source=bookings`)}} />
+                        )}
                         {canCheckIn && (
                             <Button className="!w-fit !rounded-3xl rounded-md !hover:bg-green-600 !transition-colors ml-2" buttonText="Check In" onClick={handleCheckIn} />
                         )}

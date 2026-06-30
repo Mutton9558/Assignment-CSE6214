@@ -501,7 +501,7 @@ export async function modifyBookingStatus(id: string, status: string){
             const bookingData = bookingSnap.data()
             if(bookingData){
                 const resourceRef = bookingData.resource;
-                await resourceRef({
+                await resourceRef.update({
                     status: "Available"
                 })
             }

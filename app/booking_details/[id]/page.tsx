@@ -17,7 +17,7 @@ interface ResourceDetailsPageProps {
   params: Promise<{ id: string }>;
 }
 
-export default function ResourceDetailsPage({ params }: ResourceDetailsPageProps) {
+export default function BookingDetails({ params }: ResourceDetailsPageProps) {
   const { id } = use(params);
   const router = useRouter();
   const { data: session, status } = useSession();
@@ -138,11 +138,11 @@ export default function ResourceDetailsPage({ params }: ResourceDetailsPageProps
     if (section === "booking") {
       router.push("/dashboard?tab=booking");
     } else if (section === "resources") {
-      router.push("/manage_resource");
+      router.push("/dashboard?tab=manage_resource");
     } else if (section === "analytics") {
-      router.push("/analytics");
+      router.push("/dashboard?tab=analytics");
     } else if (section === "reports") {
-      router.push("/view_reports");
+      router.push("/dashboard?tab=reports");
     }
   };
 
