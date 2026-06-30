@@ -32,7 +32,7 @@ const DetailLoader: React.FC<DetailLoaderProps> = ({ requestId }) => {
 
             if (req === null) {
                 alert('fail to load maintenance request detail');
-                router.push('/dashboard');
+                router.back();
                 return;
             }
             setMaintenanceRequest(req);
@@ -51,6 +51,11 @@ const DetailLoader: React.FC<DetailLoaderProps> = ({ requestId }) => {
         const data = Object.fromEntries(formData.entries());
         const response = data.resourceManagerResponse as string;
         const date = new Date(data.scheduleMaintenance as string);
+
+        if(Number(date) <= Date.now()){
+            alert('Not allowed to schedule a maintenance during or before the present!')
+            return;
+        }
 
         if (maintenanceRequest) {
             const success = await scheduleService(
