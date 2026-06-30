@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import Button from "./Button";
 import Input from "./input";
 import { fetchUserForAutofill } from "@/app/actions/UserController";
+import { useSession } from "next-auth/react";
 
 interface PreBookingProps{
     setActiveSection: (section: string) => void;
@@ -17,6 +18,8 @@ interface PreBookingProps{
 }
 
 export default function preBooking({ setActiveSection, setBookingData }: PreBookingProps) {
+    const {data: session, status} = useSession();
+    const isStaff = session?.user.role.toLowerCase() === "campus staff";
     const [UserID, setUserID] = useState("");
     const [FullName, setFullName] = useState("");
     const [Email, setEmail] = useState("");
@@ -26,6 +29,13 @@ export default function preBooking({ setActiveSection, setBookingData }: PreBook
     const [bookingPurpose, setBookingPurpose] = useState("");
 
     const [isSearching, setIsSearching] = useState(false);
+
+    useEffect(() => {
+        
+        if (session?.user?.id) {
+            setUserID(session.user.id);
+        }
+    }, [session]);
 
     useEffect(() => {
         if (!UserID.trim()) {

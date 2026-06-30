@@ -12,6 +12,7 @@ import Profile from "../UserBoundary/Profile";
 import EditProfile from "../UserBoundary/EditProfile";
 import SettingsPage from "../settings";
 import { UserProvider } from "../UserBoundary/UserContext";
+import BookingSummary from "../BookingSummary";
 // Don't import the page - we'll use router to navigate
 
 interface StaffDashboardProp {
@@ -90,6 +91,8 @@ export default function Staff({ default_sect }: StaffDashboardProp) {
                 return <Profile setActiveSection={changeSection} previousSection={previousSection} initialTab="bookings" />;
             case "edit-profile":
                 return <EditProfile setActiveSection={setActiveSection} />;
+            case "booking-summary":
+                return <BookingSummary setActiveSection={setActiveSection} bookingData={bookingData} setBookingData={setBookingData} />
             case "profile-reports":
                 return <Profile setActiveSection={changeSection} previousSection={previousSection} initialTab="reports" />
             case "settings":
