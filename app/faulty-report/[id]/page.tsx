@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useState, useEffect } from "react";
+import { useRouter, useParams } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { MdArrowBack } from "react-icons/md";
 import { fetchResource } from "@/app/actions/ResourceController";
@@ -142,18 +142,9 @@ useEffect(() => {
                 value={form.location}
                 onChange={(e) => handleChange("location", e.target.value)}
                 placeholder="Room or location"
-                value =value={form.location}
                 className="w-full bg-gray-100 rounded-xl px-4 py-3 text-sm text-gray-800 outline-none cursor-not-allowed focus:ring-2 focus:ring-blue-400"
                 required
                 disabled
-              />
-            </div>
-                type="text"
-                value={form.location}
-                onChange={(e) => handleChange("location", e.target.value)}
-                placeholder="Room or location"
-                className="w-full bg-gray-100 rounded-xl px-4 py-3 text-sm text-gray-800 outline-none focus:ring-2 focus:ring-blue-400"
-                required
               />
             </div>
 
