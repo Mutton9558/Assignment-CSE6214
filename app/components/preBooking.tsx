@@ -109,7 +109,7 @@ export default function preBooking({ setActiveSection, setBookingData }: PreBook
             <form className="mt-6 flex flex-col items-center gap-8" onSubmit={handleSubmit} noValidate>
                 <Input name="user-id" label="Student ID" type="text" placeholder="Student ID" value={UserID} onChange={(e) => setUserID(e.target.value)} required />
                 <Input name="full-name" label="Full Name" type="text" placeholder="Full Name" value={FullName} disabled />
-                <Input name="phoneNumber" label="Contact Number" type="number" placeholder="Contact Number" value={Phone} disabled />
+                <Input name="phoneNumber" label="Contact Number" type="text" placeholder="Contact Number" value={Phone} disabled />
                 <Input name="email" label="Student Email" type="text" placeholder="Student Email" value={Email} disabled />
                 <Input 
                     name="start-booking" 
