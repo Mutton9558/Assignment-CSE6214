@@ -89,7 +89,7 @@ export async function getUserBookings(): Promise<Booking[]> {
                         booking_status: data.booking_status || "Unknown",
                         booking_reason: data.booking_reason || "",
                         request_created_at: data.request_created_at?.toDate ? data.request_created_at.toDate().toISOString() : data.request_created_at,
-                        prev_booking: data.prev_booking || null
+                        prev_booking: data.prev_booking?.id || null
                     });
                     
                 } catch (err) {
@@ -190,8 +190,8 @@ export async function fetchAllBooking(){
                     booking_status: data.booking_status,
                     booking_reason: data.booking_reason,
                     resource: resource,
-                    request_created_at: data.request_created_at.toDate(),
-                    prev_booking: data.prev_booking
+                    request_created_at: data.request_created_at.toDate().toISOString(),
+                    prev_booking: data.prev_booking?.id || null
                 })
             }
         }
@@ -493,7 +493,7 @@ export async function modifyBookingStatus(id: string, status: string){
             const bookingData = bookingSnap.data()
             if(bookingData){
                 const resourceRef = bookingData.resource;
-                await resourceRef({
+                await resourceRef.update({
                     status: "Available"
                 })
             }
