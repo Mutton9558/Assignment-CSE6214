@@ -209,6 +209,16 @@ export async function rejectBooking(bookingId: string, email: string, reason: st
             booking_status: "Rejected"
         })
 
+        const booking = await bookingRef.get();
+        const bookingD = await booking.data();
+        if(bookingD){
+            const userRef = bookingD.booking_owner as DocumentReference;
+            if(userRef){
+                const userId = userRef.id
+                await createNotification(userId, "Booking Rejected", `Your booking request for ${resource} has been rejected. Reason: ${reason}`);
+            }
+        }
+
         // send email
         const mailOptions = {
             from: `Campus Resource Booking System <${process.env.SMTP_FROM_EMAIL}>`,
@@ -235,8 +245,6 @@ export async function rejectBooking(bookingId: string, email: string, reason: st
         };
 
         await transporter.sendMail(mailOptions);
-
-        await createNotification(bookingId, "Booking Rejected", `Your booking request for ${resource} has been rejected. Reason: ${reason}`);
 
         return {success: true}
     } catch (error){
@@ -308,9 +316,6 @@ export async function approveBooking(bookingId: string, email: string, name: str
             booking_status: "Booked"
         });
 
-        const booking = await bookingRef.get();
-        const bookingD = await booking.data();
-
         const resourceRef = adminDb.collection('Resources').doc(resource_id);
         await resourceRef.update({
             resource_status: "Booked"
@@ -341,6 +346,8 @@ If you wish to contact us, feel free to reply to this email and a staff member w
 
         await transporter.sendMail(mailOptions);
 
+        const booking = await bookingRef.get();
+        const bookingD = await booking.data();
         if(bookingD){
             const userRef = bookingD.booking_owner as DocumentReference;
             if(userRef){
