@@ -6,7 +6,7 @@ import { LuHouse, LuCalendarPlus, LuUsers } from "react-icons/lu";
 import { MdOutlinePerson } from "react-icons/md";
 import { useSearchParams, useRouter } from "next/navigation";
 import HomeDashboard from "../HomeDashboard";
-import PreBooking from "../preBookingStaff";
+import PreBooking from "../preBooking";
 import VenueBooking from "../VenueBooking";
 import Profile from "../UserBoundary/Profile";
 import EditProfile from "../UserBoundary/EditProfile";
