@@ -25,12 +25,21 @@ export default function ResourceManager() {
     const tabParam = searchParams.get("tab"); 
     
     const [activeSection, setActiveSection] = useState(tabParam || "manage-booking");
+    const [previousSection, setPreviousSection] = useState("manage-booking");
+    const [settingsEntryPoint, setSettingsEntryPoint] = useState<string | null>(null);
 
     useEffect(() => {
         if (tabParam) setActiveSection(tabParam);
     }, [tabParam]);
 
     const handleNavClick = (newSection: string) => {
+        const isEnteringSettings = newSection === 'settings';
+        const isLeavingSettingsSubPage = activeSection === 'edit-profile';
+
+        if (isEnteringSettings && !isLeavingSettingsSubPage) {
+            setSettingsEntryPoint(activeSection);
+        }
+        setPreviousSection(activeSection);
         setActiveSection(newSection);
         if (searchParams.get("tab")) {
             router.replace("/dashboard", { scroll: false }); 
@@ -55,8 +64,8 @@ export default function ResourceManager() {
                                 <p>Manage Pending Bookings</p>
                             </div>
                             
-                            <Button className="!w-10 !h-10 !p-2" buttonText="🔔" />
-                            <Button className="!w-10 !h-10 !p-2 ml-2" buttonText="⚙️" onClick={() => setActiveSection('settings')} />
+                            <Button className="!w-10 !h-10 !p-2" buttonText="🔔" onClick={() => {router.push('/notification')}} />
+                            <Button className="!w-10 !h-10 !p-2 ml-2" buttonText="⚙️" onClick={() => handleNavClick('settings')} />
                         </header>
                         <BookingUI pageType="request_list" />
                     </div>
@@ -70,8 +79,8 @@ export default function ResourceManager() {
                                 <p>Resource List</p>
                             </div>
                             
-                            <Button className="!w-10 !h-10 !p-2" buttonText="🔔" />
-                            <Button className="!w-10 !h-10 !p-2 ml-2" buttonText="⚙️" onClick={() => setActiveSection('settings')} />
+                            <Button className="!w-10 !h-10 !p-2" buttonText="🔔" onClick={() => {router.push('/notification')}} />
+                            <Button className="!w-10 !h-10 !p-2 ml-2" buttonText="⚙️" onClick={() => handleNavClick('settings')} />
                         </header>
                         <ResourceUI pageType="list" />
                     </div>
@@ -86,8 +95,8 @@ export default function ResourceManager() {
                                 <p>Analytics (18th - 24th May 2026)</p>
                             </div>
                             
-                            <Button className="!w-10 !h-10 !p-2" buttonText="🔔" />
-                            <Button className="!w-10 !h-10 !p-2 ml-2" buttonText="⚙️" onClick={() => setActiveSection('settings')} />
+                            <Button className="!w-10 !h-10 !p-2" buttonText="🔔" onClick={() => {router.push('/notification')}} />
+                            <Button className="!w-10 !h-10 !p-2 ml-2" buttonText="⚙️" onClick={() => handleNavClick('settings')} />
                         </header>
                         <AnalyticsUI />
                     </div>
@@ -101,16 +110,16 @@ export default function ResourceManager() {
                                 <h1 className="text-2xl font-bold mb-4">Hi, {session?.user.name || "user"}!</h1>
                                 <p>Maintenance Request List</p>
                             </div>
-                            <Button className="!w-10 !h-10 !p-2" buttonText="🔔" />
-                            <Button className="!w-10 !h-10 !p-2 ml-2" buttonText="⚙️" onClick={() => setActiveSection('settings')} />
+                            <Button className="!w-10 !h-10 !p-2" buttonText="🔔" onClick={() => {router.push('/notification')}} />
+                            <Button className="!w-10 !h-10 !p-2 ml-2" buttonText="⚙️" onClick={() => handleNavClick('settings')} />
                         </header>
                         <MaintenanceUI pageType="list" />;
                     </div>
                 )
             case "settings":
-                return <SettingsPage setActiveSection={setActiveSection}  />;
+                return <SettingsPage handleNavClick={handleNavClick} entryPoint={settingsEntryPoint || 'manage-booking'} />;
             case "edit-profile":
-                return <EditProfile setActiveSection={setActiveSection} />;
+                return <EditProfile setActiveSection={handleNavClick} />;
             default:
                 return <div>Section not found</div>;
         }

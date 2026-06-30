@@ -204,7 +204,7 @@ export default function EditProfile({ setActiveSection }: EditProfileProps) {
                     </div>
                 </div>
                 <div className="flex flex-row gap-4 w-full justify-center">
-                    <Button type="reset" className="!w-fit !rounded-3xl !py-3 !px-5 rounded-md !hover:bg-blue-600 !transition-colors" buttonText="Cancel" onClick={() => setActiveSection("profile")} />
+                    <Button type="reset" className="!w-fit !rounded-3xl !py-3 !px-5 rounded-md !hover:bg-blue-600 !transition-colors" buttonText="Cancel" onClick={() => setActiveSection("settings")} />
                     <Button type="submit" className="!w-fit !rounded-3xl !py-3 !px-5 rounded-md !hover:bg-blue-600 !transition-colors" buttonText={isSaving ? "Saving..." : "Save Changes"} disabled={isSaving} />
                 </div>
             </form>
