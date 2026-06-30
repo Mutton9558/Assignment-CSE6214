@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { use } from "react";
-import { createBooking } from "@/app/actions/BookingController";
+import { createBooking } from "@/app/actions/BookingController"
 import { useSession } from "next-auth/react";
 import Button from "../components/Button";
 

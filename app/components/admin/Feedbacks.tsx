@@ -8,6 +8,7 @@ import { MdOutlinePerson } from "react-icons/md";
 import Button from "../Button";
 
 interface Feedback {
+    setActiveSection: (section: string) => void;
     id: number;
     timestamp: string;
     name: string;
@@ -17,7 +18,7 @@ interface Feedback {
     comments: string;
 }
 
-export default function Feedbacks() {
+export default function Feedbacks({ setActiveSection }: { setActiveSection: (section: string) => void }) {
     const router = useRouter();
     const { user: adminUser, isLoading } = useUser();
     const [feedbacks, setFeedbacks] = useState<Feedback[]>([]);
@@ -48,7 +49,7 @@ export default function Feedbacks() {
                     </h1>
                     <p className="text-sm text-gray-600">Feedbacks</p>
                 </div>
-                <Button buttonText="🚪" className="!w-10 !h-10" onClick={() => router.push("/login")} />
+                <Button buttonText="⚙️" className="!w-10 !h-10" onClick={() => setActiveSection("settings")} />
             </header>
 
             <div className="flex flex-col gap-3">

@@ -146,7 +146,8 @@ export async function deleteResource(id: string){
         const docRef = adminDb.collection('Resources').doc(id);
 
         /// Queue the deletion of the resource document
-        adminDb.batch().delete(docRef);
+        const batch = adminDb.batch();
+        batch.delete(docRef);
 
         /// Delete all bookings associated with this resource
         const bookingsQuery = await adminDb.collection("Bookings")
@@ -154,7 +155,7 @@ export async function deleteResource(id: string){
             .get();
 
         bookingsQuery.docs.forEach((bookingDoc) => {
-            adminDb.batch().delete(bookingDoc.ref);
+            batch.delete(bookingDoc.ref);
         });
 
         /// Delete all maintenance requests associated with this resource
@@ -163,11 +164,11 @@ export async function deleteResource(id: string){
             .get();
 
         maintenanceQuery.docs.forEach((maintenanceDoc) => {
-            adminDb.batch().delete(maintenanceDoc.ref);
+            batch.delete(maintenanceDoc.ref);
         });
 
         /// Commit the batch deletion
-        await adminDb.batch().commit();
+        await batch.commit();
 
         return {success: true}
     } catch (error) {
